@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.model_selection import learning_curve, ShuffleSplit
 
 from util.graphing import plot_learning_curve, plot_scalability
+from util.graphing import plot_hyperparam_validation_curve
 
 
 class TestDetails(object):
@@ -62,9 +63,9 @@ class BaseTest(ABC):
 
         return train_time.microseconds, query_time.microseconds, predictions
 
-    def run_learning_curve(self, train_sizes=np.linspace(0.1, 1.0, 5)):
+    def run_learning_curve(self, train_sizes=np.linspace(0.1, 1.0, 10)):
 
-        cv = ShuffleSplit(n_splits=3, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=20, test_size=0.1, random_state=0)
 
         train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
             self._learner.Classifier,
@@ -80,6 +81,29 @@ class BaseTest(ABC):
         plot_learning_curve(train_scores, test_scores, train_sizes, self.Name)
         plot_scalability(fit_times, train_sizes, self.Name)
 
+        return
+
+    def run_multi_run_hyperparameter_validation(self, method, hyperparameter, n_runs=4):
+        """
+
+        :param method: should return a ndarray of hyperparameter keys, train scores, and test_scores
+        :return:
+        """
+
+        train_scores = []
+        test_scores = []
+        param_list = None
+
+        for _ in range(0, n_runs):
+            param_list, temp_train_scores, temp_test_scores = method()
+
+            train_scores.append(temp_train_scores)
+            test_scores.append(temp_test_scores)
+
+        train_scores_np = np.concatenate(train_scores, axis=1)
+        test_scores_np = np.concatenate(test_scores, axis=1)
+
+        plot_hyperparam_validation_curve(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter)
         return
 
     @abstractmethod

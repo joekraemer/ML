@@ -48,7 +48,7 @@ def run_all_exp_for_dataset(test_dataset):
     # run_experiment(DecisionTreeTests, test_dataset, train_times, test_times)
     # run_experiment(KNNTests, test_dataset, train_times, test_times)
     # run_experiment(NNTests, test_dataset, train_times, test_times)
-    # run_experiment(BoostedTests, test_dataset, train_times, test_times)
+    run_experiment(BoostedTests, test_dataset, train_times, test_times)
     run_experiment(SVMTests, test_dataset, train_times, test_times)
 
     graph_runtimes(train_times, test_times, 'lung_cancer', seed)
