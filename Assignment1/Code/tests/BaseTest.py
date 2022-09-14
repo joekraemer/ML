@@ -14,7 +14,7 @@ class TestDetails(object):
 
 
 class BaseTest(ABC):
-    def __init__(self, details, name='', n_jobs=5, verbose=False):
+    def __init__(self, details, name='', n_jobs=1, verbose=False):
         self.Name = name
         self.N_jobs = n_jobs
 
@@ -31,11 +31,23 @@ class BaseTest(ABC):
         :return:
         """
 
-        train_time_ms, query_time_ms, predictions = self.single_train_predict_with_timiing()
-        self.run_additional(predictions)
+        train_time_ms, query_time_ms = self.multi_run_train_test_timing()
+        self.run_additional()
         self.run_learning_curve()
 
         return train_time_ms, query_time_ms
+
+    def multi_run_train_test_timing(self, number_of_runs=20):
+        """Make multiple runs to get more accurate timing for testing and training the model"""
+
+        train_times = []
+        query_times = []
+        for _ in range(0,number_of_runs):
+            temp_train, temp_query, _ = self.single_train_predict_with_timiing()
+            train_times.append(temp_train)
+            query_times.append(temp_query)
+
+        return train_times, query_times
 
     def single_train_predict_with_timiing(self):
         ds = self._details.ds
@@ -56,8 +68,8 @@ class BaseTest(ABC):
 
         train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
             self._learner.Classifier,
-            self._details.ds.X,
-            self._details.ds.Y,
+            self._details.ds.test_x,
+            self._details.ds.test_y,
             scoring="accuracy",
             cv=cv,
             n_jobs=self.N_jobs,
@@ -71,7 +83,7 @@ class BaseTest(ABC):
         return
 
     @abstractmethod
-    def run_additional(self, predictions):
+    def run_additional(self):
         """
         run_additional is called to do addition graphing and testing if need be
         :param predictions: results of the testing phase of the run_basic() routine.

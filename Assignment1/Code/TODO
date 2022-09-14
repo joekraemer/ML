@@ -1,0 +1,10 @@
+
+
+Move multirun hyperparameter_validation from boosted_test to base_test
+    - remplement all other tests to use this method
+
+Balance Datasets
+
+Dataset investigation/graphing
+
+Listen to office hours

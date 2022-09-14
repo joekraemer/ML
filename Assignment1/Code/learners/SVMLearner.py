@@ -4,8 +4,8 @@ from sklearn import svm
 
 
 class SVMLearner(BaseLearner):
-    def __init__(self, n_neighbors=5, algorithm='ball_tree'):
-        super().__init__(svm.SVC())
+    def __init__(self, C=1, kernel='rbf'):
+        super().__init__(svm.SVC(C=C, kernel=kernel))
 
     def train(self, X, Y):
         self.Classifier.fit(X, Y)
