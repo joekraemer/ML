@@ -40,6 +40,21 @@ def graph_runtimes(train_times, test_times, dataset_name, seed):
     return
 
 
+def run_all_exp_for_dataset(test_dataset):
+    train_times = {}
+    test_times = {}
+
+    # run experiments
+    # run_experiment(DecisionTreeTests, test_dataset, train_times, test_times)
+    # run_experiment(KNNTests, test_dataset, train_times, test_times)
+    # run_experiment(NNTests, test_dataset, train_times, test_times)
+    # run_experiment(BoostedTests, test_dataset, train_times, test_times)
+    run_experiment(SVMTests, test_dataset, train_times, test_times)
+
+    graph_runtimes(train_times, test_times, 'lung_cancer', seed)
+    return
+
+
 def run_experiment(test, test_dataset, train_times, test_times):
     test_instance = test(test_dataset)
     dt_runtimes = test_instance.run()
@@ -57,23 +72,13 @@ if __name__ == '__main__':
     #TODO: Add dataset loading
     dataset_1 = loading_data.load_lung_cancer()
     dataset_2 = loading_data.load_red_wine()
-    dataset_3 = loading_data.load_student_entrance_exam()
-    # dataset_4 = loading_data.load_absenteeism_at_work()
+    # dataset_3 = loading_data.load_student_entrance_exam()
+    dataset_4 = loading_data.load_absenteeism_at_work()
 
     test_1_dataset = TestDetails(dataset_1, seed)
     test_2_dataset = TestDetails(dataset_2, seed)
 
-    train_times = {}
-    test_times = {}
-
-    # run experiments
-    # run_experiment(DecisionTreeTests, test_2_dataset, train_times, test_times)
-    # run_experiment(KNNTests, test_2_dataset, train_times, test_times)
-    # run_experiment(NNTests, test_1_dataset, train_times, test_times)
-    run_experiment(BoostedTests, test_1_dataset, train_times, test_times)
-    # run_experiment(SVMTests, test_2_dataset, train_times, test_times)
-
-    graph_runtimes(train_times, test_times, 'lung_cancer', seed)
+    run_all_exp_for_dataset(test_1_dataset)
 
 
 

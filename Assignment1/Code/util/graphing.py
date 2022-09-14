@@ -65,7 +65,7 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name):
     return
 
 
-def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label):
+def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, x_tick_labels=None):
     fig, ax = plt.subplots()
 
     train_scores_mean = np.mean(train_scores, axis=1)
@@ -95,6 +95,10 @@ def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label):
         x, test_scores_mean, "o-", color="g", label="Cross-validation score"
     )
     ax.legend(loc="best")
+
+    if x_tick_labels != None:
+        ax.set_xticks(x)
+        ax.set_xticklabels(x_tick_labels)
 
     ax.set_xlabel(label)
     ax.set_ylabel("Score")
@@ -127,10 +131,10 @@ def plot_scalability(fit_times, train_sizes, name):
     return
 
 
-def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x, name, label):
+def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, name, label):
     fig, ax = plt.subplots()
 
-    x = np.arange(len(x))  # the label locations
+    x = np.arange(len(x_labels))  # the label locations
     width = 0.35  # the width of the bars
 
     train_scores_mean = np.mean(train_scores, axis=1)
@@ -142,6 +146,9 @@ def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x, name, lab
     rects2 = ax.bar(x + width/2, test_scores_mean, width, label='Cross-validation score', color="g")
 
     ax.legend(loc="best")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(x_labels)
 
     ax.set_xlabel(label)
     ax.set_ylabel("Score")

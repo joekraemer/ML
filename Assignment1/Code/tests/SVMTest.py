@@ -14,12 +14,12 @@ class SVMTests(BaseTest):
         self._learner = SVMLearner()
 
     def run_additional(self):
-        #self.run_hyperparameter_validation()
+        self.run_hyperparameter_validation()
         self.run_various_kernels()
         pass
 
     def run_various_kernels(self):
-        cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
         kernel_list = ['linear', 'poly', 'rbf', 'sigmoid']
         train_scores = []
@@ -40,6 +40,7 @@ class SVMTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
+
         plot_hyperparam_validation_bar_chart(train_scores, test_scores, kernel_list, self.Name, 'Kernel')
         return
 
@@ -49,8 +50,7 @@ class SVMTests(BaseTest):
 
     def run_c_validation(self):
         """ Evaluate Regularization parameter """
-        # TODO need to see if this CV splits the same way for each cross_validation
-        cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
         c_list = np.linspace(0.1, 3, 30)
         train_scores = []

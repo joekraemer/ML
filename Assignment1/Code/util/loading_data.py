@@ -4,7 +4,7 @@ from scipy.io import arff
 from tests.BaseTest import TestDetails
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-# from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler
 
 
 class Dataset(object):
@@ -31,11 +31,11 @@ def load_lung_cancer(split=0.75):
     y = data[:, -1].astype('int')
 
     # TODO: This data set is unbalanced
-    # ros = RandomOverSampler(random_state=0)
-    # X_resampled, y_resampled = ros.fit_resample(X, y)
+    ros = RandomOverSampler(random_state=0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
 
-    X_balanced = X
-    y_balanced = y
+    X_balanced = X_resampled
+    y_balanced = y_resampled
 
     # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
@@ -60,11 +60,11 @@ def load_wine(path, name):
     y = data[:, -1]
 
     # TODO: This data set is unbalanced
-    # ros = RandomOverSampler(random_state=0)
-    # X_resampled, y_resampled = ros.fit_resample(X, y)
+    ros = RandomOverSampler(random_state=0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
 
-    X_balanced = X
-    y_balanced = y
+    X_balanced = X_resampled
+    y_balanced = y_resampled
 
     # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
@@ -124,11 +124,11 @@ def load_absenteeism_at_work():
 
 
     # TODO: This data set is unbalanced
-    # ros = RandomOverSampler(random_state=0)
-    # X_resampled, y_resampled = ros.fit_resample(X, y)
+    ros = RandomOverSampler(random_state=0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
 
-    X_balanced = X
-    y_balanced = y
+    X_balanced = X_resampled
+    y_balanced = y_resampled
 
     # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
@@ -139,7 +139,7 @@ def load_absenteeism_at_work():
     # Scale only on the training data so we don't leak into the test
     X_test_scaled = scaler.fit_transform(X_test)
 
-    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, name)
+    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'absentee')
     return ds
 
 

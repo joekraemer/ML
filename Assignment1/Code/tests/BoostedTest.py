@@ -28,9 +28,9 @@ class BoostedTests(BaseTest):
     def run_num_estimators_validation(self):
         """ Evaluate Hyperparameters """
         # TODO need to see if this CV splits the same way for each cross_validation
-        cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
-        n_estimators_list = np.linspace(1, 40, 20).astype(int)
+        n_estimators_list = np.linspace(1, 80, 40).astype(int)
         train_scores = []
         test_scores = []
 
@@ -53,8 +53,7 @@ class BoostedTests(BaseTest):
 
     def run_lr_validation(self):
         """ Evaluate Hyperparameters """
-        # TODO need to see if this CV splits the same way for each cross_validation
-        cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
         lr_list = np.linspace(0.01, 10, 20)
         train_scores = []
@@ -77,7 +76,6 @@ class BoostedTests(BaseTest):
 
         return lr_list, np.asarray(train_scores), np.asarray(test_scores)
 
-
     def run_multi_run_hyperparameter_validation(self, method, hyperparameter, n_runs=4):
         """
 
@@ -98,5 +96,5 @@ class BoostedTests(BaseTest):
         train_scores_np = np.concatenate(train_scores, axis=1)
         test_scores_np = np.concatenate(test_scores, axis=1)
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, param_list, self.Name, hyperparameter)
+        plot_hyperparam_validation_curve(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter)
 

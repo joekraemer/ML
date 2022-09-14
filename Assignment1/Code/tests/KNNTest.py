@@ -21,10 +21,9 @@ class KNNTests(BaseTest):
         # for KNN we will evaluate k and TODO
 
         """ Evaluate Leaf Size """
-        # TODO need to see if this CV splits the same way for each cross_validation
-        cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
-        k_list = np.linspace(1, 30, 15).astype(int)
+        k_list = np.linspace(1, 30, 20).astype(int)
         train_scores = []
         test_scores = []
 

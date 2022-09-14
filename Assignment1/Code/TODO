@@ -1,10 +1,14 @@
 
 
+
 Move multirun hyperparameter_validation from boosted_test to base_test
-    - remplement all other tests to use this method
+    - reimplement all other tests to use this method
 
-Balance Datasets
+Change dataset split seed when appropriate
+    - random_state is only keeping constant the makeup of the data sets when split
 
-Dataset investigation/graphing
+Dataset balancing investigation/graphing
 
 Listen to office hours
+
+1. Decision Tree: pruning
