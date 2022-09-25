@@ -2,9 +2,12 @@ import pandas as pd
 import numpy as np
 from scipy.io import arff
 from tests.BaseTest import TestDetails
+# import uci_dataset as dataset
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler
+from util.graphing import plot_correlation_matrix
+
 
 
 class Dataset(object):
@@ -47,6 +50,8 @@ def load_lung_cancer(split=0.75):
     X_test_scaled = scaler.fit_transform(X_test)
 
     ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Lung Cancer')
+    plot_correlation_matrix(pd.DataFrame(X).astype(float), ds.name)
+
     return ds
 
 
@@ -76,6 +81,8 @@ def load_wine(path, name):
     X_test_scaled = scaler.fit_transform(X_test)
 
     ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, name)
+    df = pd.DataFrame(X).astype(float)
+    plot_correlation_matrix(df, ds.name, hue=10)
     return ds
 
 
@@ -91,6 +98,40 @@ def load_white_wine():
 
 def load_yeast():
     data_pd = pd.read_table('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Yeast/yeast.data')
+    data_pd2 = pd.read_table('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Yeast/yeast.data', sep="\t")
+    return data_pd
+
+
+def load_cardio():
+    ''' This is a continousu dataset '''
+    dataset_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Cardiotocography/SimplyCSV2.csv'
+    data_df = pd.read_csv(dataset_path)
+
+    data = data_df.to_numpy()
+
+    X = data[:, 0:-1]
+    y = data[:, -1]
+
+    # TODO: This data set is unbalanced
+    ros = RandomOverSampler(random_state=0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
+
+    X_balanced = X_resampled
+    y_balanced = y_resampled
+
+    # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
+    X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
+
+    # Standardize the data
+    scaler = preprocessing.StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    # Scale only on the training data so we don't leak into the test
+    X_test_scaled = scaler.fit_transform(X_test)
+
+    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Cardio')
+    df = pd.DataFrame(X).astype(float)
+    # plot_correlation_matrix(df, ds.name, hue=10)
+    return ds
 
 
 def load_student_entrance_exam():
@@ -103,7 +144,7 @@ def load_student_entrance_exam():
     y = data[:, 0]
 
     # TODO need to remove the b' portion of the string
-    # TODO need to make sure that the Exellent, vg, etc are configured correctly to be ordinal
+    # TODO need to make sure that the Excellent, vg, etc are configured correctly to be ordinal
 
     ordinal_enc = preprocessing.OrdinalEncoder()
     post_ord = ordinal_enc.fit_transform(X, y)

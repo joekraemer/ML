@@ -19,7 +19,6 @@ class SVMTests(BaseTest):
         pass
 
     def run_various_kernels(self):
-        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
         kernel_list = ['linear', 'poly', 'rbf', 'sigmoid']
         train_scores = []
@@ -31,8 +30,8 @@ class SVMTests(BaseTest):
                 temp_learner.Classifier,
                 self._details.ds.train_x,
                 self._details.ds.train_y,
-                scoring="accuracy",
-                cv=cv,
+                scoring=self._scoring_metric,
+                cv=self._validation_fold_iterator,
                 n_jobs=self.N_jobs,
                 return_train_score=True
             )
@@ -41,7 +40,7 @@ class SVMTests(BaseTest):
             test_scores.append(res['test_score'])
 
 
-        plot_hyperparam_validation_bar_chart(train_scores, test_scores, kernel_list, self.Name, 'Kernel')
+        plot_hyperparam_validation_bar_chart(train_scores, test_scores, kernel_list, self.Name, 'Kernel', folder=self._details.ds.name)
         return
 
     def run_hyperparameter_validation(self):
@@ -50,7 +49,6 @@ class SVMTests(BaseTest):
 
     def run_c_validation(self):
         """ Evaluate Regularization parameter """
-        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
         c_list = np.linspace(0.1, 3, 30)
         train_scores = []
@@ -62,8 +60,8 @@ class SVMTests(BaseTest):
                 temp_learner.Classifier,
                 self._details.ds.train_x,
                 self._details.ds.train_y,
-                scoring="accuracy",
-                cv=cv,
+                scoring=self._scoring_metric,
+                cv=self._validation_fold_iterator,
                 n_jobs=self.N_jobs,
                 return_train_score=True
             )
@@ -71,4 +69,4 @@ class SVMTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, c_list, self.Name, 'C')
+        plot_hyperparam_validation_curve(train_scores, test_scores, c_list, self.Name, 'C', folder=self._details.ds.name)

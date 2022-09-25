@@ -4,7 +4,7 @@ from sklearn.ensemble import AdaBoostClassifier
 
 
 class BoostedLearner(BaseLearner):
-    def __init__(self, n_estimators=10, learning_rate=1):
+    def __init__(self, n_estimators=65, learning_rate=1):
         super().__init__(AdaBoostClassifier(n_estimators=n_estimators, learning_rate=learning_rate))
 
     def train(self, X, Y):

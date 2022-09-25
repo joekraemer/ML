@@ -11,7 +11,11 @@ from util.graphing import plot_hyperparam_validation_curve
 class BoostedTests(BaseTest):
     def __init__(self, details):
         super().__init__(details, name='Boosted')
-        self._learner = BoostedLearner()
+        self._learner = BoostedLearner(n_estimators=details.boost_n_estimators, learning_rate=details.boost_learning_rate)
+
+        # Constants
+        self.n_estimators_list = details.boost_n_estimators_list
+        self.lr_list = details.boost_lr_list
 
     def run_additional(self):
         self.run_hyperparameter_validation()
@@ -22,26 +26,22 @@ class BoostedTests(BaseTest):
 
         self.run_multi_run_hyperparameter_validation(self.run_lr_validation, 'lr_multi')
         self.run_multi_run_hyperparameter_validation(self.run_num_estimators_validation, 'num_estimators_multi')
-        self.run_num_estimators_validation()
-        self.run_lr_validation()
         return
 
     def run_num_estimators_validation(self):
         """ Evaluate Hyperparameters """
-        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
-        n_estimators_list = np.linspace(1, 80, 40).astype(int)
         train_scores = []
         test_scores = []
 
-        for n in n_estimators_list:
-            temp_learner = BoostedLearner(n_estimators=n)
+        for n in self.n_estimators_list:
+            temp_learner = BoostedLearner(n_estimators=n, learning_rate=self._details.boost_learning_rate)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
                 self._details.ds.train_y,
-                scoring="accuracy",
-                cv=cv,
+                scoring=self._scoring_metric,
+                cv=self._validation_fold_iterator,
                 n_jobs=self.N_jobs,
                 return_train_score=True
             )
@@ -49,24 +49,22 @@ class BoostedTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        return n_estimators_list, np.asarray(train_scores), np.asarray(test_scores)
+        return self.n_estimators_list, np.asarray(train_scores), np.asarray(test_scores)
 
     def run_lr_validation(self):
         """ Evaluate Hyperparameters """
-        cv = ShuffleSplit(n_splits=10, test_size=0.2)
 
-        lr_list = np.linspace(0.01, 1.25, 20)
         train_scores = []
         test_scores = []
 
-        for lr in lr_list:
-            temp_learner = BoostedLearner(learning_rate=lr)
+        for lr in self.lr_list:
+            temp_learner = BoostedLearner(learning_rate=lr, n_estimators=self._details.boost_n_estimators)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
                 self._details.ds.train_y,
-                scoring="accuracy",
-                cv=cv,
+                scoring=self._scoring_metric,
+                cv=self._validation_fold_iterator,
                 n_jobs=self.N_jobs,
                 return_train_score=True
             )
@@ -74,4 +72,4 @@ class BoostedTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        return lr_list, np.asarray(train_scores), np.asarray(test_scores)
+        return self.lr_list, np.asarray(train_scores), np.asarray(test_scores)

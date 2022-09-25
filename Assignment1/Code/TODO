@@ -1,19 +1,31 @@
+TODO ULTRA CRIT
+- Run Tests for next data set
+    - import data
+    - examine dataset
 
-Add dependency injection or some kind of configuration lookup for applying different parameters for different datasets
 
-Move multirun hyperparameter_validation from boosted_test to base_test
-    - reimplement all other tests to use this method
-
-Change dataset split seed when appropriate
+TODO CRIT
+- Listen to office hours
+-
+- Change dataset split seed when appropriate
     - random_state is only keeping constant the makeup of the data sets when split
+- reimplement multi run all other tests to use this method
 
-Dataset balancing investigation/graphing
 
-Get LC to add more than 100 samples
+TODO Later
+- GridSearch
 
-Listen to office hours
+SVM
+    - show training and test performance for two kernels
 
-1. Decision Tree: pruning
+1. Decision Tree:
+    - pruning
+        - could just display the decision tree before and after pruning
+    - could add partial-dependence-plots
+
+### Report Notes ###
+
+"I did X, I expected Y, I saw Z. I think this is because W".
 
 All grading is done with the context of the results
     - giving descriptions of algorithms alone isn't useful
@@ -22,3 +34,6 @@ The reader understands the basics of ML algorithms
 
 Don't provide a table of context, manage space well
     - use dual column
+
+link results back to the tuning and back to the algorithm and how it performs in the dataset
+    - example was how a decision tree select which features to split on
