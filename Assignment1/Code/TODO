@@ -3,6 +3,9 @@ TODO ULTRA CRIT
     - import data
     - examine dataset
 
+- Somehow investigate how my datasets affect the algorithms
+    - Check linear
+
 
 TODO CRIT
 - Listen to office hours
@@ -12,7 +15,9 @@ TODO CRIT
 - reimplement multi run all other tests to use this method
 
 
-TODO Later
+TODO: Requirements before submitting
+
+TODO If time Later
 - GridSearch
 
 SVM

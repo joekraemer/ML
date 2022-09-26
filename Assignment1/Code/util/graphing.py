@@ -13,9 +13,30 @@ def plot_correlation_matrix(df, name, hue=None, folder='Data'):
     plot_helper('Pair Plot of ' + name, 'pair_plot_' + name, folder=folder, show=False)
 
 
+def bar_chart(labels, data_1, yaxis_label, d1_std=None,
+                      title='', file_name='', folder=None):
+    # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
+
+    x = np.arange(len(labels)).astype(float)  # the label locations
+    width = 0.35  # the width of the bars
+
+    fig, ax = plt.subplots()
+    fig.set_figheight(5)
+    fig.set_figwidth(6)
+    rects1 = ax.bar(x, data_1, width, yerr=d1_std, color='g')
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+
+    ax.set_ylabel(yaxis_label)
+    ax.legend()
+
+    plot_helper(title, file_name, folder=folder, show=False)
+    return
+
 
 def grouped_bar_chart(labels, data_1, data_2, label_1, label_2, yaxis_label, d1_std=None, d2_std=None,
-                      title='', file_name='', folder=None):
+                      title='', file_name='', folder=None, logy=False):
     # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
 
     x = np.arange(len(labels)).astype(float)  # the label locations
@@ -33,10 +54,14 @@ def grouped_bar_chart(labels, data_1, data_2, label_1, label_2, yaxis_label, d1_
     ax.set_ylabel(yaxis_label)
     ax.legend()
 
+    if logy:
+        plt.semilogy()
+
     plot_helper(title, file_name, folder=folder, show=False)
+    return
 
 
-def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=4, width=5):
+def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=3, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -70,15 +95,17 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     ax.legend(loc="best")
 
     ax.set_xlabel("Training examples")
-    ax.set_ylabel("Score")
+    ax.set_ylabel("F1 Weighted Score")
 
     plot_helper('', 'lc_' + name, folder=folder, show=False)
 
     return
 
 
-def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, folder, x_tick_labels=None, enable_dots=True):
+def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, folder, x_tick_labels=None, enable_dots=True, height=3, width=5):
     fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
 
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
@@ -125,8 +152,8 @@ def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, 
     ax.set_xlabel(label)
     ax.set_ylabel("Score")
 
-    plot_helper('Tuning ' + label + ' Hyperparameter for ' + name, 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
-
+    plot_helper('', 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
+    plt.clf()
     return
 
 
@@ -157,7 +184,7 @@ def plot_single_curve(data, name, title, ylabel, xlabel, folder):
     return
 
 
-def plot_scalability(fit_times, train_sizes, name, folder, height=4, width=5):
+def plot_scalability(fit_times, train_sizes, name, folder, height=3, width=5):
     # Plot Scalability
     fig, ax = plt.subplots()
     fig.set_figheight(height)
@@ -182,8 +209,10 @@ def plot_scalability(fit_times, train_sizes, name, folder, height=4, width=5):
     return
 
 
-def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, name, label, folder):
+def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, name, label, folder, height=3, width=5):
     fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
 
     x = np.arange(len(x_labels))  # the label locations
     width = 0.35  # the width of the bars
@@ -204,7 +233,7 @@ def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, na
     ax.set_xlabel(label)
     ax.set_ylabel("Score")
 
-    plot_helper('Tuning ' + label + ' Hyperparameter for ' + name, 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
+    plot_helper('', 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
 
     return
 

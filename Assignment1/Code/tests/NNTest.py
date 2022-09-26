@@ -12,11 +12,17 @@ from util.graphing import plot_hyperparam_validation_curve, plot_single_curve
 class NNTests(BaseTest):
     def __init__(self, details):
         super().__init__(details, name='NN')
-        self._learner = NNLearner()
+        self._learner = NNLearner(alpha=self._details.NNL_alpha, n_nodes=self._details.NNL_n_nodes, n_layers=self._details.NNL_n_layers)
+
+        self.neurons_list = self._details.NNT_neurons_list
+        self.layers_list = self._details.NNT_layers_list
+        self.alpha_list = self._details.NNT_alpha_list
+
+        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=2, test_size=0.3, random_state=0)
 
     def run_additional(self):
-        self.run_loss_curve()
-        self.run_hyperparameter_validation()
+        # self.run_loss_curve()
+        # self.run_hyperparameter_validation()
         pass
 
     def run_hyperparameter_validation(self):
@@ -24,18 +30,17 @@ class NNTests(BaseTest):
         # self.run_neurons_validation()
         # self.run_alpha_validation()
         # self.run_layers_validation()
-        self.run_loss_curve()
+        # self.run_loss_curve()
         return
 
     def run_neurons_validation(self):
         """ Evaluate Hyperparameters """
 
-        neurons_list = np.linspace(5, 150, 20).astype(int)
         train_scores = []
         test_scores = []
 
-        for n in neurons_list:
-            temp_learner = NNLearner(n_nodes=n)
+        for n in self.neurons_list:
+            temp_learner = NNLearner(n_nodes=n, alpha=self._details.NNL_alpha, n_layers=self._details.NNL_n_layers)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -49,17 +54,16 @@ class NNTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, neurons_list, self.Name, 'Number of Nodes', folder=self._details.ds.name)
+        plot_hyperparam_validation_curve(train_scores, test_scores, self.neurons_list, self.Name, 'Number of Nodes', folder=self._details.ds.name)
 
     def run_layers_validation(self):
         """ Evaluate layers Hyperparameters """
 
-        layers_list = np.linspace(1, 6, 6).astype(int)
         train_scores = []
         test_scores = []
 
-        for n in layers_list:
-            temp_learner = NNLearner(n_layers=n)
+        for n in self.layers_list:
+            temp_learner = NNLearner(n_layers=n, alpha=self._details.NNL_alpha, n_nodes=self._details.NNL_n_nodes)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -73,17 +77,16 @@ class NNTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, layers_list, self.Name, 'Number of Hidden Layers', folder=self._details.ds.name)
+        plot_hyperparam_validation_curve(train_scores, test_scores, self.layers_list, self.Name, 'Number of Hidden Layers', folder=self._details.ds.name)
 
     def run_alpha_validation(self):
         """ Evaluate Hyperparameters """
 
-        alpha_list = np.linspace(1e-6, 1e-4, 5)
         train_scores = []
         test_scores = []
 
-        for a in alpha_list:
-            temp_learner = NNLearner(alpha=a)
+        for a in self.alpha_list:
+            temp_learner = NNLearner(alpha=a, n_nodes=self._details.NNL_n_nodes, n_layers=self._details.NNL_n_layers)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -97,7 +100,7 @@ class NNTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, alpha_list, self.Name, 'alpha', folder=self._details.ds.name)
+        plot_hyperparam_validation_curve(train_scores, test_scores, self.alpha_list, self.Name, 'alpha', folder=self._details.ds.name)
 
     def run_loss_curve(self):
 
@@ -106,8 +109,8 @@ class NNTests(BaseTest):
         # Don't want to use the default iterator because it doesn't preserve the loss curve for each fold
         fold_iterator = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=0)
 
-        for _ in range(0, 9):
-            temp_learner = NNLearner()
+        for _ in range(0, 90):
+            temp_learner = NNLearner(alpha=self._details.NNL_alpha, n_nodes=self._details.NNL_n_nodes, n_layers=self._details.NNL_n_layers)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,

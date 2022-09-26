@@ -1,3 +1,4 @@
+from sklearn.tree import DecisionTreeClassifier
 from tests.BaseTest import BaseTest
 import datetime
 import numpy as np
@@ -16,6 +17,7 @@ class BoostedTests(BaseTest):
         # Constants
         self.n_estimators_list = details.boost_n_estimators_list
         self.lr_list = details.boost_lr_list
+        self.boost_ccp_alpha_list = details.boost_ccp_alpha_list
 
     def run_additional(self):
         self.run_hyperparameter_validation()
@@ -24,8 +26,9 @@ class BoostedTests(BaseTest):
     def run_hyperparameter_validation(self):
         # for NN we will evaluate number of neurons and number of layers
 
-        self.run_multi_run_hyperparameter_validation(self.run_lr_validation, 'lr_multi')
-        self.run_multi_run_hyperparameter_validation(self.run_num_estimators_validation, 'num_estimators_multi')
+        self.run_multi_run_hyperparameter_validation(self.run_lr_validation, 'learning rate')
+        self.run_multi_run_hyperparameter_validation(self.run_num_estimators_validation, 'num_estimators')
+        self.run_multi_run_hyperparameter_validation(self.run_ccp_alpha_validation, 'ccp_alpha')
         return
 
     def run_num_estimators_validation(self):
@@ -73,3 +76,26 @@ class BoostedTests(BaseTest):
             test_scores.append(res['test_score'])
 
         return self.lr_list, np.asarray(train_scores), np.asarray(test_scores)
+
+    def run_ccp_alpha_validation(self):
+        """ Evaluate Hyperparameters """
+
+        train_scores = []
+        test_scores = []
+
+        for alpha in self.boost_ccp_alpha_list:
+            temp_learner = BoostedLearner(base_estimator=DecisionTreeClassifier(ccp_alpha=alpha), learning_rate=self._details.boost_learning_rate, n_estimators=self._details.boost_n_estimators)
+            res = cross_validate(
+                temp_learner.Classifier,
+                self._details.ds.train_x,
+                self._details.ds.train_y,
+                scoring=self._scoring_metric,
+                cv=self._validation_fold_iterator,
+                n_jobs=self.N_jobs,
+                return_train_score=True
+            )
+
+            train_scores.append(res['train_score'])
+            test_scores.append(res['test_score'])
+
+        return self.boost_ccp_alpha_list, np.asarray(train_scores), np.asarray(test_scores)

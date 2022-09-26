@@ -104,7 +104,7 @@ def load_yeast():
 
 def load_cardio():
     ''' This is a continousu dataset '''
-    dataset_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Cardiotocography/SimplyCSV2.csv'
+    dataset_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Cardiotocography/TripleCatCSV.csv'
     data_df = pd.read_csv(dataset_path)
 
     data = data_df.to_numpy()
@@ -131,6 +131,37 @@ def load_cardio():
     ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Cardio')
     df = pd.DataFrame(X).astype(float)
     # plot_correlation_matrix(df, ds.name, hue=10)
+    return ds
+
+def load_diabetic():
+    data = arff.loadarff('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
+    data_df = pd.DataFrame(data).astype(float)
+
+    data = data_df.to_numpy()
+
+    X = data[:, 0:-1]
+    y = data[:, -1].astype(int)
+
+    # TODO: This data set is unbalanced
+    ros = RandomOverSampler(random_state=0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
+
+    X_balanced = X_resampled
+    y_balanced = y_resampled
+
+    # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
+    X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
+
+    # Standardize the data
+    scaler = preprocessing.StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    # Scale only on the training data so we don't leak into the test
+    X_test_scaled = scaler.fit_transform(X_test)
+
+    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Diabetic')
+    df = pd.DataFrame(X).astype(float)
+    # plot_correlation_matrix(df, ds.name, hue=10)
+
     return ds
 
 
@@ -182,8 +213,6 @@ def load_absenteeism_at_work():
 
     ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'absentee')
     return ds
-
-
 
 
 def loading_arff():

@@ -11,7 +11,10 @@ from util.graphing import plot_hyperparam_validation_curve, plot_hyperparam_vali
 class SVMTests(BaseTest):
     def __init__(self, details):
         super().__init__(details, name='SVM')
-        self._learner = SVMLearner()
+        self._learner = SVMLearner(C=self._details.SVML_C, kernel=self._details.SVML_kernel)
+
+        self.kernel_list = self._details.SVMT_kernel_list
+        self.c_list = self._details.SVMT_c_list
 
     def run_additional(self):
         self.run_hyperparameter_validation()
@@ -20,12 +23,11 @@ class SVMTests(BaseTest):
 
     def run_various_kernels(self):
 
-        kernel_list = ['linear', 'poly', 'rbf', 'sigmoid']
         train_scores = []
         test_scores = []
 
-        for kernel in kernel_list:
-            temp_learner = SVMLearner(kernel=kernel)
+        for kernel in self.kernel_list:
+            temp_learner = SVMLearner(kernel=kernel, C=self._details.SVML_C)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -40,7 +42,7 @@ class SVMTests(BaseTest):
             test_scores.append(res['test_score'])
 
 
-        plot_hyperparam_validation_bar_chart(train_scores, test_scores, kernel_list, self.Name, 'Kernel', folder=self._details.ds.name)
+        plot_hyperparam_validation_bar_chart(train_scores, test_scores, self.kernel_list, self.Name, 'Kernel', folder=self._details.ds.name)
         return
 
     def run_hyperparameter_validation(self):
@@ -50,12 +52,11 @@ class SVMTests(BaseTest):
     def run_c_validation(self):
         """ Evaluate Regularization parameter """
 
-        c_list = np.linspace(0.1, 3, 30)
         train_scores = []
         test_scores = []
 
-        for c in c_list:
-            temp_learner = SVMLearner(C=c)
+        for c in self.c_list:
+            temp_learner = SVMLearner(C=c, kernel=self._details.SVML_kernel)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -69,4 +70,4 @@ class SVMTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, c_list, self.Name, 'C', folder=self._details.ds.name)
+        plot_hyperparam_validation_curve(train_scores, test_scores, self.c_list, self.Name, 'C', folder=self._details.ds.name)

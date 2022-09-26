@@ -11,7 +11,10 @@ from util.graphing import plot_hyperparam_validation_curve
 class KNNTests(BaseTest):
     def __init__(self, details):
         super().__init__(details, name='KNN')
-        self._learner = KNNLearner()
+        self._learner = KNNLearner(n_neighbors=self._details.KNNL_n_neighbors, algorithm=self._details.KNNL_algorithm)
+
+        self.algo_list = self._details.KNNT_algo_list
+        self.k_list = self._details.KNNT_k_list
 
     def run_additional(self):
         self.run_hyperparameter_validation()
@@ -26,13 +29,11 @@ class KNNTests(BaseTest):
     def run_algo_validation(self):
         """ Evaluate algo Hyperparameters """
 
-        algo_list = ['ball_tree', 'kd_tree', 'brute']
-
         train_scores = []
         test_scores = []
 
-        for algo in algo_list:
-            temp_learner = KNNLearner(n_neighbors=15, algorithm=algo)
+        for algo in self.algo_list:
+            temp_learner = KNNLearner(n_neighbors=self._details.KNNL_n_neighbors, algorithm=algo)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -46,18 +47,17 @@ class KNNTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        return algo_list, np.asarray(train_scores), np.asarray(test_scores)
+        return self.algo_list, np.asarray(train_scores), np.asarray(test_scores)
 
     def run_k_validation(self):
         # for KNN we will evaluate k and TODO
 
         """ Evaluate Leaf Size """
-        k_list = np.linspace(1, 30, 20).astype(int)
         train_scores = []
         test_scores = []
 
-        for k in k_list:
-            temp_learner = KNNLearner(n_neighbors=k)
+        for k in self.k_list:
+            temp_learner = KNNLearner(n_neighbors=k, algorithm=self._details.KNNL_algorithm)
             res = cross_validate(
                 temp_learner.Classifier,
                 self._details.ds.train_x,
@@ -71,5 +71,5 @@ class KNNTests(BaseTest):
             train_scores.append(res['train_score'])
             test_scores.append(res['test_score'])
 
-        plot_hyperparam_validation_curve(train_scores, test_scores, k_list, self.Name, '# Neighbors', folder=self._details.ds.name)
-        return k_list, np.asarray(train_scores), np.asarray(test_scores)
+        plot_hyperparam_validation_curve(train_scores, test_scores, self.k_list, self.Name, 'N_Neighbors', folder=self._details.ds.name)
+        return self.k_list, np.asarray(train_scores), np.asarray(test_scores)

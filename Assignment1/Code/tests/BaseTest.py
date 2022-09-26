@@ -6,6 +6,7 @@ from sklearn.model_selection import learning_curve, StratifiedShuffleSplit
 
 from util.graphing import plot_learning_curve, plot_scalability
 from util.graphing import plot_hyperparam_validation_curve, plot_hyperparam_validation_bar_chart
+from sklearn.metrics import f1_score
 
 
 class TestDetails(object):
@@ -13,21 +14,53 @@ class TestDetails(object):
         self.ds = ds
         self.seed = seed
 
-        # Boosted Consts
+        # Boosted Tests Consts
         self.boost_n_estimators_list = np.linspace(1, 80, 40).astype(int)
         self.boost_lr_list = np.linspace(0.01, 1.25, 20)
+        self.boost_ccp_alpha_list = np.linspace(0.0, 0.003, 5)
 
-        # DT Consts
+        # Boosted Learner Consts
+        self.boost_n_estimators = 65
+        self.boost_learning_rate = 1
+
+        # DT Tests Consts
+        self.DTT_leaf_sizes_list = np.linspace(1, 100, 100, dtype=int)
+        self.DTT_ccp_alpha_list = np.linspace(0.0, 0.005, 30)
+        self.DTT_max_depth_list = np.linspace(1, 20, 20, dtype=int)
+
+        # DT Learner Consts
+        self.DTL_leaf_size = 1
+        self.DTL_ccp_alpha = 0.0
+        self.DTL_max_depth = 6
 
         # KNN Consts
+        self.KNNT_algo_list = ['ball_tree', 'kd_tree', 'brute']
+        self.KNNT_k_list = np.linspace(1, 30, 20).astype(int)
 
-        # NN Consts
+        # KNN Learner Consts
+        self.KNNL_n_neighbors = 15
+        self.KNNL_algorithm = 'ball_tree'
 
-        # SVM Consts
+        # NN Test Consts
+        self.NNT_neurons_list = np.linspace(10, 120, 15).astype(int)
+        self.NNT_layers_list = np.linspace(1, 6, 6).astype(int)
+        self.NNT_alpha_list = np.linspace(1e-6, 1e-4, 5)
+
+        # NN Learner Consts
+        self.NNL_alpha = 1e-5
+        self.NNL_n_nodes = 50
+        self.NNL_n_layers = 3
+
+        # SVM Tests Consts
+        self.SVMT_kernel_list = ['linear', 'poly', 'rbf', 'sigmoid']
+        self.SVMT_c_list = np.linspace(0.1, 3, 20)
+        # SVM Learner Consts
+        self.SVML_C = 1
+        self.SVML_kernel = 'rbf'
 
 
 class BaseTest(ABC):
-    def __init__(self, details, name='', n_jobs=1, verbose=True):
+    def __init__(self, details, name='', n_jobs=3, verbose=True):
         self.Name = name
         self.N_jobs = n_jobs
 
@@ -36,7 +69,7 @@ class BaseTest(ABC):
         self._learner = None
 
         self._scoring_metric = "f1_weighted"
-        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=7, test_size=0.1, random_state=0)
+        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=0)
 
         # results of predictions
         self._predictions = None
@@ -48,32 +81,38 @@ class BaseTest(ABC):
         """
         if self._verbose:
             print("Starting " + self.Name + " tests.")
-            print("Starting timing tests.")
-        train_time_ms, query_time_ms = self.multi_run_train_test_timing()
+            print("      Starting timing tests.")
+        train_time_ms, query_time_ms, prediction_scores = self.multi_run_train_test_timing()
 
         if self._verbose:
-            print("Starting Learning Curve. ")
+            print("      Starting Learning Curve. ")
 
-        self.run_learning_curve()
+        # self.run_learning_curve()
 
         if self._verbose:
-            print("Starting Additional Tests.")
+            print("      Starting Additional Tests.")
 
-        self.run_additional()
+        # self.run_additional()
 
-        return train_time_ms, query_time_ms
+        return train_time_ms, query_time_ms, prediction_scores
 
     def multi_run_train_test_timing(self, number_of_runs=10):
         """Make multiple runs to get more accurate timing for testing and training the model"""
 
         train_times = []
         query_times = []
+        score_list = []
+
         for _ in range(0, number_of_runs):
-            temp_train, temp_query, _ = self.single_train_predict_with_timing()
+            temp_train, temp_query, predictions = self.single_train_predict_with_timing()
             train_times.append(temp_train)
             query_times.append(temp_query)
 
-        return train_times, query_times
+            temp_score = f1_score(self._details.ds.test_y, predictions, average='weighted')
+
+            score_list.append(temp_score)
+
+        return train_times, query_times, score_list
 
     def single_train_predict_with_timing(self):
         ds = self._details.ds
@@ -90,10 +129,11 @@ class BaseTest(ABC):
 
     def run_learning_curve(self, train_sizes=np.linspace(0.1, 1.0, 10)):
 
+        # TODO: Should I be using test or train set here?
         train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
             self._learner.Classifier,
-            self._details.ds.test_x,
-            self._details.ds.test_y,
+            self._details.ds.train_x,
+            self._details.ds.train_y,
             scoring="f1_weighted",
             cv=self._validation_fold_iterator,
             n_jobs=self.N_jobs,
@@ -133,7 +173,7 @@ class BaseTest(ABC):
             plot_hyperparam_validation_curve(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter, folder=self._details.ds.name)
 
         if self._verbose:
-            print(hyperparameter + " validation complete.")
+            print("      " + hyperparameter + " validation complete.")
         return
 
     @abstractmethod
