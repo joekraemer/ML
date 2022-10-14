@@ -97,7 +97,6 @@ def graph_runtimes(train_times, test_times, dataset_name, seed):
 
 
 def graph_final_scores(final_scores, dataset_name):
-
     labels = list(final_scores.keys())
 
     # prevent from making graphs for a partial run
@@ -111,7 +110,6 @@ def graph_final_scores(final_scores, dataset_name):
         test_scores_mean.append(np.mean(run))
         test_scores_std.append(np.std(run))
 
-
     bar_chart(labels, test_scores_mean, "F1 Weighted Score", d1_std=test_scores_std, title='', file_name='final_scores_' + dataset_name, folder=dataset_name )
 
 
@@ -121,14 +119,14 @@ def run_all_exp_for_dataset(test_dataset):
     final_scores = {}
 
     # run experiments
-    run_experiment(DecisionTreeTests, test_dataset, train_times, test_times, final_scores)
-    run_experiment(BoostedTests, test_dataset, train_times, test_times, final_scores)
-    run_experiment(KNNTests, test_dataset, train_times, test_times, final_scores)
+    #run_experiment(DecisionTreeTests, test_dataset, train_times, test_times, final_scores)
+    #run_experiment(BoostedTests, test_dataset, train_times, test_times, final_scores)
+    #run_experiment(KNNTests, test_dataset, train_times, test_times, final_scores)
     run_experiment(NNTests, test_dataset, train_times, test_times, final_scores)
-    run_experiment(SVMTests, test_dataset, train_times, test_times, final_scores)
+    #run_experiment(SVMTests, test_dataset, train_times, test_times, final_scores)
 
-    graph_runtimes(train_times, test_times, test_dataset.ds.name, seed)
-    graph_final_scores(final_scores, test_dataset.ds.name)
+    #graph_runtimes(train_times, test_times, test_dataset.ds.name, seed)
+    #graph_final_scores(final_scores, test_dataset.ds.name)
     return
 
 
@@ -153,7 +151,7 @@ if __name__ == '__main__':
     print("Starting Tests....")
 
     run_all_exp_for_dataset(TestDetails(dataset_2, seed))
-    # run_all_exp_for_dataset(DiabeticTest(dataset_7, seed))
+    run_all_exp_for_dataset(DiabeticTest(dataset_7, seed))
 
 
 

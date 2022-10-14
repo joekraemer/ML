@@ -69,7 +69,7 @@ class BaseTest(ABC):
         self._learner = None
 
         self._scoring_metric = "f1_weighted"
-        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=0)
+        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
 
         # results of predictions
         self._predictions = None
@@ -87,16 +87,16 @@ class BaseTest(ABC):
         if self._verbose:
             print("      Starting Learning Curve. ")
 
-        # self.run_learning_curve()
+        self.run_learning_curve()
 
         if self._verbose:
             print("      Starting Additional Tests.")
 
         # self.run_additional()
 
-        return train_time_ms, query_time_ms, prediction_scores
+        # return train_time_ms, query_time_ms, prediction_scores
 
-    def multi_run_train_test_timing(self, number_of_runs=10):
+    def multi_run_train_test_timing(self, number_of_runs=1):
         """Make multiple runs to get more accurate timing for testing and training the model"""
 
         train_times = []

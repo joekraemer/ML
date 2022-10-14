@@ -1,13 +1,10 @@
 import pandas as pd
 import numpy as np
 from scipy.io import arff
-from tests.BaseTest import TestDetails
-# import uci_dataset as dataset
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler
-from util.graphing import plot_correlation_matrix
-
+from sklearn.preprocessing import OneHotEncoder
 
 
 class Dataset(object):
@@ -50,7 +47,6 @@ def load_lung_cancer(split=0.75):
     X_test_scaled = scaler.fit_transform(X_test)
 
     ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Lung Cancer')
-    plot_correlation_matrix(pd.DataFrame(X).astype(float), ds.name)
 
     return ds
 
@@ -80,15 +76,18 @@ def load_wine(path, name):
     # Scale only on the training data so we don't leak into the test
     X_test_scaled = scaler.fit_transform(X_test)
 
-    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, name)
-    df = pd.DataFrame(X).astype(float)
-    plot_correlation_matrix(df, ds.name, hue=10)
+    # One hot encode target values
+    one_hot = OneHotEncoder()
+    y_train_hot = one_hot.fit_transform(y_train.reshape(-1, 1)).todense()
+    y_test_hot = one_hot.transform(y_test.reshape(-1, 1)).todense()
+
+    ds = Dataset(X_train_scaled, y_train_hot, X_test_scaled, y_test_hot, name)
     return ds
 
 
 def load_red_wine():
     red_wine_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Wine/winequality-red.csv'
-    return load_wine(red_wine_path, 'Red Wine')
+    return load_wine(red_wine_path, 'red_wine')
 
 
 def load_white_wine():
@@ -142,14 +141,12 @@ def load_diabetic():
     X = data[:, 0:-1]
     y = data[:, -1].astype(int)
 
-    # TODO: This data set is unbalanced
     ros = RandomOverSampler(random_state=0)
     X_resampled, y_resampled = ros.fit_resample(X, y)
 
     X_balanced = X_resampled
     y_balanced = y_resampled
 
-    # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)
 
     # Standardize the data
@@ -158,10 +155,13 @@ def load_diabetic():
     # Scale only on the training data so we don't leak into the test
     X_test_scaled = scaler.fit_transform(X_test)
 
-    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, 'Diabetic')
-    df = pd.DataFrame(X).astype(float)
-    # plot_correlation_matrix(df, ds.name, hue=10)
+    # One hot encode target values
+    one_hot = OneHotEncoder()
+    y_train_hot = one_hot.fit_transform(y_train.reshape(-1, 1)).todense()
+    y_test_hot = one_hot.transform(y_test.reshape(-1, 1)).todense()
 
+
+    ds = Dataset(X_train_scaled, y_train_hot, X_test_scaled, y_test_hot, 'diabetic')
     return ds
 
 
@@ -215,11 +215,9 @@ def load_absenteeism_at_work():
     return ds
 
 
-def loading_arff():
-    '''Example from documentation'''
-    # data = arff.load(open('../data/data.arff', 'r'))['data']
-    X = [i[:4] for i in data]
-    y = [i[-1] for i in data]
+if __name__ == "__main__":
+    # testing one-hot encoding
+    load_red_wine()
 
 
 

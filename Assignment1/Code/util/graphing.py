@@ -98,7 +98,6 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     ax.set_ylabel("F1 Weighted Score")
 
     plot_helper('', 'lc_' + name, folder=folder, show=False)
-
     return
 
 

@@ -18,10 +18,11 @@ class NNTests(BaseTest):
         self.layers_list = self._details.NNT_layers_list
         self.alpha_list = self._details.NNT_alpha_list
 
-        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=2, test_size=0.3, random_state=0)
+        self._validation_fold_iterator = StratifiedShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
+        self._scoring_metric = 'accuracy'
 
     def run_additional(self):
-        # self.run_loss_curve()
+        self.run_loss_curve()
         # self.run_hyperparameter_validation()
         pass
 
@@ -30,7 +31,6 @@ class NNTests(BaseTest):
         # self.run_neurons_validation()
         # self.run_alpha_validation()
         # self.run_layers_validation()
-        # self.run_loss_curve()
         return
 
     def run_neurons_validation(self):
@@ -109,7 +109,7 @@ class NNTests(BaseTest):
         # Don't want to use the default iterator because it doesn't preserve the loss curve for each fold
         fold_iterator = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=0)
 
-        for _ in range(0, 90):
+        for _ in range(0, 9):
             temp_learner = NNLearner(alpha=self._details.NNL_alpha, n_nodes=self._details.NNL_n_nodes, n_layers=self._details.NNL_n_layers)
             res = cross_validate(
                 temp_learner.Classifier,

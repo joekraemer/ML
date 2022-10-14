@@ -1,28 +1,84 @@
 import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
+import pandas as pd
 import seaborn as sns
+
+
+def _draw_variance_curve(ax, df, label):
+    data_mean = np.mean(df, axis=0)
+    data_std = np.std(df, axis=0)
+    x = range(0, len(data_mean))
+
+    # Plot learning curve
+    ax.fill_between(
+        x,
+        data_mean - data_std,
+        data_mean + data_std,
+        alpha=0.1
+    )
+
+    ax.plot(x, data_mean, label=label)
+    return
+
+
+def plot_algo_dict_generic_with_variance(data_dict):
+    fig, ax = plt.subplots()
+
+    rhc = pd.DataFrame(data_dict['rhc'])
+    sa = pd.DataFrame(data_dict['sa'])
+    ga = pd.DataFrame(data_dict['ga'])
+    mimic = pd.DataFrame(data_dict['mimic'])
+
+    _draw_variance_curve(ax, rhc, label='Randomized Hill Climb')
+    _draw_variance_curve(ax, sa, label='Simulated Annealing')
+    _draw_variance_curve(ax, ga, label='Genetic Algorithm')
+    _draw_variance_curve(ax, mimic, label='MIMIC')
+
+    return fig, ax
 
 
 def plot_algo_dict_generic(dict, x=None):
     # plots generic data from a set dictionary config
 
-    sa = np.array(dict['sa'])
     rhc = np.array(dict['rhc'])
+    sa = np.array(dict['sa'])
     ga = np.array(dict['ga'])
     mimic = np.array(dict['mimic'])
 
     if x is not None:
-        plt.plot(x, sa, label='Simulated Annealing')
         plt.plot(x, rhc, label='Randomized Hill Climb')
+        plt.plot(x, sa, label='Simulated Annealing')
         plt.plot(x, ga, label='Genetic Algorithm')
         plt.plot(x, mimic, label='MIMIC')
     else:
-        plt.plot(sa, label='Simulated Annealing')
         plt.plot(rhc, label='Randomized Hill Climb')
+        plt.plot(sa, label='Simulated Annealing')
         plt.plot(ga, label='Genetic Algorithm')
         plt.plot(mimic, label='MIMIC')
+    return
 
+
+def plot_hyperparam_dict_generic(hyper_dict, label):
+    plt.figure()
+    for key, item in hyper_dict.items():
+        label_temp = label + key
+        plt.plot(item[:, 0], label=label_temp)
+
+    plt.legend()
+    plt.xlabel('Iterations')
+    plt.ylabel('Fitness')
+    return
+
+
+def plot_lc_evaluations(evaluations_dict, dataset):
+    plt.figure()
+    plot_algo_dict_generic(evaluations_dict)
+
+    plt.xlabel('Iterations')
+    plt.ylabel('# of Function Evaluations')
+    plt.legend()
+    plot_helper('', dataset + '_evaluations_vs_iterations', dataset)
     return
 
 
@@ -33,31 +89,108 @@ def plot_lc_iterations(iterations_dict, dataset):
     plt.xlabel('Iterations')
     plt.ylabel('Fitness')
     plt.legend()
-    plot_helper('', dataset + 'iterations_vs_fitness_', dataset)
+    plot_helper('', dataset + '_fitness_vs_iterations', dataset)
+    return
+
+
+def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename):
+    # catch when we are trying to plot variance
+    if type(data_dict['rhc']) == dict:
+        fig, ax = plot_algo_dict_generic_with_variance(data_dict, x)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.legend(loc="best")
+
+    else:
+        plt.figure()
+        plot_algo_dict_generic(data_dict, x)
+
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend()
+
+    plot_helper('', dataset + filename, dataset)
     return
 
 
 def plot_fitness_vs_complexity(complexity_dict, x, dataset):
-    plt.figure()
-    plot_algo_dict_generic(complexity_dict, x)
-
-    plt.xlabel('Problem Size')
-    plt.ylabel('Fitness')
-    plt.legend()
-
-    plot_helper('', dataset + 'fitness_vs_complexity_', dataset)
+    plot_generic_multi_algo_dict(complexity_dict, x, dataset,
+                                 xlabel='Problem Size',
+                                 ylabel='Fitness',
+                                 filename='_fitness_vs_complexity_')
     return
 
 
 def plot_time_vs_complexity(time_dict, x, dataset):
-    plt.figure()
-    plot_algo_dict_generic(time_dict, x)
+    plot_generic_multi_algo_dict(time_dict, x, dataset,
+                                 xlabel='Problem Size',
+                                 ylabel='Computation Time (s)',
+                                 filename='_time_vs_comlexity')
+    return
 
-    plt.xlabel('Problem Size')
-    plt.ylabel('Computation Time (s)')
-    plt.legend()
 
-    plot_helper('', dataset + 'time_vs_comlexity_', dataset)
+def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=3, width=5):
+    fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
+
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+
+    # Plot learning curve
+    ax.fill_between(
+        train_sizes,
+        train_scores_mean - train_scores_std,
+        train_scores_mean + train_scores_std,
+        alpha=0.1,
+        color="r",
+    )
+    ax.fill_between(
+        train_sizes,
+        test_scores_mean - test_scores_std,
+        test_scores_mean + test_scores_std,
+        alpha=0.1,
+        color="g",
+    )
+    ax.plot(
+        train_sizes, train_scores_mean, "o-", color="r", label="Training score"
+    )
+    ax.plot(
+        train_sizes, test_scores_mean, "o-", color="g", label="Cross-validation score"
+    )
+    ax.legend(loc="best")
+
+    ax.set_xlabel("Training examples")
+    ax.set_ylabel("F1 Weighted Score")
+
+    plot_helper('', 'learning_curve_' + name, folder=folder, show=False)
+    return
+
+
+def plot_scalability(fit_times, train_sizes, name, folder, height=3, width=5):
+    # Plot Scalability
+    fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
+
+    fit_times_mean = np.mean(fit_times, axis=1)
+    fit_times_std = np.std(fit_times, axis=1)
+
+    ax.grid()
+    ax.plot(train_sizes, fit_times_mean, "o-")
+    ax.fill_between(
+        train_sizes,
+        fit_times_mean - fit_times_std,
+        fit_times_mean + fit_times_std,
+        alpha=0.1,
+    )
+
+    ax.set_xlabel("Training examples")
+    ax.set_ylabel("Time to Fit Model (ms)")
+
+    plot_helper('', 'scalability_' + name, folder=folder, show=False)
     return
 
 
