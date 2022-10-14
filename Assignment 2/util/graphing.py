@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import seaborn as sns
 
 
-def _draw_variance_curve(ax, df, label):
+def _draw_variance_curve(ax, df, x=None, label=''):
     data_mean = np.mean(df, axis=0)
     data_std = np.std(df, axis=0)
-    x = range(0, len(data_mean))
+    if x is None:
+        x = range(0, len(data_mean))
 
     # Plot learning curve
     ax.fill_between(
@@ -22,7 +22,7 @@ def _draw_variance_curve(ax, df, label):
     return
 
 
-def plot_algo_dict_generic_with_variance(data_dict):
+def plot_algo_dict_generic_with_variance(data_dict, x=None):
     fig, ax = plt.subplots()
 
     rhc = pd.DataFrame(data_dict['rhc'])
@@ -30,10 +30,10 @@ def plot_algo_dict_generic_with_variance(data_dict):
     ga = pd.DataFrame(data_dict['ga'])
     mimic = pd.DataFrame(data_dict['mimic'])
 
-    _draw_variance_curve(ax, rhc, label='Randomized Hill Climb')
-    _draw_variance_curve(ax, sa, label='Simulated Annealing')
-    _draw_variance_curve(ax, ga, label='Genetic Algorithm')
-    _draw_variance_curve(ax, mimic, label='MIMIC')
+    _draw_variance_curve(ax, rhc, x, label='Randomized Hill Climb')
+    _draw_variance_curve(ax, sa, x, label='Simulated Annealing')
+    _draw_variance_curve(ax, ga, x, label='Genetic Algorithm')
+    _draw_variance_curve(ax, mimic, x, label='MIMIC')
 
     return fig, ax
 
@@ -60,20 +60,41 @@ def plot_algo_dict_generic(dict, x=None):
 
 
 def plot_hyperparam_dict_generic(hyper_dict, label):
-    plt.figure()
-    for key, item in hyper_dict.items():
-        label_temp = label + key
-        plt.plot(item[:, 0], label=label_temp)
+    fig, ax = plt.subplots()
 
-    plt.legend()
+    for key, item in hyper_dict.items():
+        df = pd.DataFrame(item)
+        label_temp = label + key
+        _draw_variance_curve(ax, df, label=label_temp)
+
+    ax.set_xlabel('Iterations')
+    ax.set_ylabel('Fitness')
+    ax.legend(loc="best")
+    return
+
+
+def plot_loss_curves(loss_dict, dataset):
+    fig, ax = plt.subplots()
+    rhc = pd.DataFrame(loss_dict['rhc'])
+    sa = pd.DataFrame(loss_dict['sa'])
+    ga = pd.DataFrame(loss_dict['ga'])
+    gd = pd.DataFrame(loss_dict['gd'])
+
+    _draw_variance_curve(ax, rhc, label='Randomized Hill Climb')
+    _draw_variance_curve(ax, sa, label='Simulated Annealing')
+    _draw_variance_curve(ax, ga, label='Genetic Algorithm')
+    _draw_variance_curve(ax, gd, label='gd')
+
     plt.xlabel('Iterations')
-    plt.ylabel('Fitness')
+    plt.ylabel('Loss')
+    plt.legend()
+    plot_helper('', dataset + '_loss_vs_iterations', 'nn_' + dataset)
     return
 
 
 def plot_lc_evaluations(evaluations_dict, dataset):
     plt.figure()
-    plot_algo_dict_generic(evaluations_dict)
+    plot_algo_dict_generic_with_variance(evaluations_dict)
 
     plt.xlabel('Iterations')
     plt.ylabel('# of Function Evaluations')
@@ -84,7 +105,7 @@ def plot_lc_evaluations(evaluations_dict, dataset):
 
 def plot_lc_iterations(iterations_dict, dataset):
     plt.figure()
-    plot_algo_dict_generic(iterations_dict)
+    plot_algo_dict_generic_with_variance(iterations_dict)
 
     plt.xlabel('Iterations')
     plt.ylabel('Fitness')
@@ -95,7 +116,7 @@ def plot_lc_iterations(iterations_dict, dataset):
 
 def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename):
     # catch when we are trying to plot variance
-    if type(data_dict['rhc']) == dict:
+    if type(data_dict['rhc']) == list:
         fig, ax = plot_algo_dict_generic_with_variance(data_dict, x)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)

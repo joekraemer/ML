@@ -15,20 +15,43 @@ class GenericTester(object):
         self.Name = name
         self.N_Jobs = n_jobs
         self.ComplexityList = complexity_list
+        self.Seed = 123456
         return
 
     @abstractmethod
-    def problem_constructor(self, complexity=20):
+    def problem_constructor(self, complexity=20, seed=123456):
         problem = None
         init_state = None
         return problem, init_state
 
-    def run(self):
-        self.run_single_exp_complexity()
-        self.run_single_exp_iterations()
-        self.run_hyperparameters()
+    def run_best_rhc(self, problem, init_state, curve=True):
+        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=10000, restarts=10,
+                                              init_state=init_state, curve=curve)
 
-    def run_single_exp_complexity(self, number_of_runs=3):
+    def run_best_sa(self, problem, init_state, curve=True):
+        return mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.ExpDecay(),
+                                                max_attempts=1000, max_iters=100000,
+                                                init_state=init_state, curve=curve)
+
+    def run_best_ga(self, problem, init_state, curve=True):
+        return mlrose_hiive.genetic_alg(problem, max_attempts=100, max_iters=10000, curve=curve)
+
+    def run_best_mimic(self, problem, init_state, curve=True):
+        return mlrose_hiive.mimic(problem, pop_size=150, max_attempts=100, max_iters=10000,
+                                  curve=curve)
+
+    def run(self):
+        self.run_experiment_complexity()
+        self.run_experiment_iterations()
+        self.run_hyperparameters()
+        return
+
+    def runners_learning_curves(self):
+        # I want to each type of algo multiple times so that the learning curves show variance
+        # processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(self._run_single_complexity)(i) for i in inputs)
+        return
+
+    def run_experiment_complexity(self, number_of_runs=3):
         inputs = tqdm(self.ComplexityList)
 
         fitness_dict = {
@@ -45,11 +68,17 @@ class GenericTester(object):
             "mimic": [],
         }
 
-        for _ in range(0, number_of_runs):
-            processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(self._run_single_complexity)(i) for i in inputs)
+        for n in range(0, number_of_runs):
+            processed_list_all = Parallel(n_jobs=self.N_Jobs)(
+                delayed(self._run_single_complexity)(i, n) for i in inputs)
             print("all complete")
 
             as_array = np.array(processed_list_all)
+
+            evals = as_array[:, 8]
+            diff = np.diff(evals)
+            avg = diff.mean()
+            std = diff.std()
 
             fitness_dict["rhc"].append(as_array[:, 4])
             fitness_dict["sa"].append(as_array[:, 5])
@@ -61,83 +90,91 @@ class GenericTester(object):
             time_dict["ga"].append(as_array[:, 2])
             time_dict["mimic"].append(as_array[:, 3])
 
+        # plot_evaluations_vs_complexity(fitness_dict, self.ComplexityList, self.Name)
         plot_fitness_vs_complexity(fitness_dict, self.ComplexityList, self.Name)
         plot_time_vs_complexity(time_dict, self.ComplexityList, self.Name)
 
         return
 
-    def _run_single_complexity(self, c):
-        problem, init_state = self.problem_constructor(c)
+    def _run_single_complexity(self, c, seed_offset):
+        problem, init_state = self.problem_constructor(c, self.Seed + seed_offset)
 
         start = time.time()
-        _, best_fitness_rhc, _ = mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=10000,
-                                                                init_state=init_state, curve=True)
-        end = time.time()
-        rhc_time = end - start
+        _, best_fitness_rhc, fc_rhc = self.run_best_rhc(problem, init_state, curve=True)
+        rhc_time = time.time() - start
         print("RHC:", rhc_time, c)
 
         start = time.time()
-        _, best_fitness_sa, _ = mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.ExpDecay(),
-                                                                 max_attempts=1000, max_iters=100000,
-                                                                 init_state=init_state, curve=True)
-        end = time.time()
-        sa_time = end - start
+        _, best_fitness_sa, fc_sa = self.run_best_sa(problem, init_state, curve=True)
+        sa_time = time.time() - start
         print("SA:", sa_time, c)
 
         start = time.time()
-        _, best_fitness_ga, _ = mlrose_hiive.genetic_alg(problem, max_attempts=1000, max_iters=10000, curve=True)
-        end = time.time()
-        ga_time = end - start
+        _, best_fitness_ga, fc_ga = self.run_best_ga(problem, init_state, curve=True)
+        ga_time = time.time() - start
         print("GA:", ga_time, c)
 
         start = time.time()
-        _, best_fitness_mimic, _ = mlrose_hiive.mimic(problem, pop_size=500, max_attempts=100, max_iters=10000,
-                                                      curve=True)
-        end = time.time()
-        mimic_time = end - start
+        _, best_fitness_mimic, fc_mimic = self.run_best_mimic(problem, init_state, curve=True)
+        mimic_time = time.time() - start
         print("MIMIC:", mimic_time, c)
 
         return [rhc_time, sa_time, ga_time, mimic_time, best_fitness_rhc, best_fitness_sa, best_fitness_ga,
-                best_fitness_mimic]
+                best_fitness_mimic, fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[:, 1]]
 
-    def run_single_exp_iterations(self):
+    def run_experiment_iterations(self, number_of_runs=3):
+        inputs = tqdm(range(0, number_of_runs))
+
         ## Plot change with respect to iterations
-        problem, init_state = self.problem_constructor()
-
-        _, _, fitness_curve_rhc = mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=10000,
-                                                                 init_state=init_state, curve=True)
-        print("Done with RHC iterations!")
-        _, _, fitness_curve_sa = mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.ExpDecay(),
-                                                                  max_attempts=1000, max_iters=100000,
-                                                                  init_state=init_state, curve=True)
-        print("Done with SA iterations!")
-
-        _, _, fitness_curve_ga = mlrose_hiive.genetic_alg(problem, max_attempts=1000, max_iters=1000, curve=True)
-        print("Done with GA iterations!")
-        _, _, fitness_curve_mimic = mlrose_hiive.mimic(problem, pop_size=500, max_attempts=100, max_iters=10000,
-                                                       curve=True)
-        print("Done with MIMIC iterations!")
-
-        # (column 0 is fitness per iteration and column 1 is total evaluations per iteration)
-        iterations_dict = {
-            "rhc": fitness_curve_rhc[:, 0],
-            "sa": fitness_curve_sa[:, 0],
-            "ga": fitness_curve_ga[:, 0],
-            "mimic": fitness_curve_mimic[:, 0],
+        fitness_dict = {
+            "rhc": [],
+            "sa": [],
+            "ga": [],
+            "mimic": [],
         }
 
         evaluations_dict = {
-            "rhc": fitness_curve_rhc[:, 1],
-            "sa": fitness_curve_sa[:, 1],
-            "ga": fitness_curve_ga[:, 1],
-            "mimic": fitness_curve_mimic[:, 1],
+            "rhc": [],
+            "sa": [],
+            "ga": [],
+            "mimic": [],
         }
 
-        plot_lc_iterations(iterations_dict, self.Name)
+        processed_list_all = Parallel(n_jobs=self.N_Jobs)(
+            delayed(self._run_single_iterations)(i) for i in inputs)
+        print("all complete")
+
+        for run_res in processed_list_all:
+            fitness_dict["rhc"].append(run_res[0])
+            fitness_dict["sa"].append(run_res[1])
+            fitness_dict["ga"].append(run_res[2])
+            fitness_dict["mimic"].append(run_res[3])
+
+            evaluations_dict["rhc"].append(run_res[4])
+            evaluations_dict["sa"].append(run_res[5])
+            evaluations_dict["ga"].append(run_res[6])
+            evaluations_dict["mimic"].append(run_res[7])
+
+        plot_lc_iterations(fitness_dict, self.Name)
         plot_lc_evaluations(evaluations_dict, self.Name)
 
+    def _run_single_iterations(self, seed_offset):
+        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
+
+        _, _, fc_rhc = self.run_best_rhc(problem, init_state, curve=True)
+        print("Done with RHC iterations!")
+        _, _, fc_sa = self.run_best_sa(problem, init_state, curve=True)
+        print("Done with SA iterations!")
+        _, _, fc_ga = self.run_best_ga(problem, init_state, curve=True)
+        print("Done with GA iterations!")
+        _, _, fc_mimic = self.run_best_mimic(problem, init_state, curve=True)
+        print("Done with MIMIC iterations!")
+
+        # (column 0 is fitness per iteration and column 1 is total evaluations per iteration)
+        return fc_rhc[:, 0], fc_sa[:, 0], fc_ga[:, 0], fc_mimic[:, 0], fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[
+                                                                                                               :, 1]
+
     def run_hyperparameters(self):
-        hyperTester = HyperTester(self.problem_constructor(), self.Name)
+        hyperTester = HyperTester(self.problem_constructor, self.Name)
         hyperTester.run_hyperparameters()
         return
-

@@ -1,6 +1,7 @@
 import numpy as np
 import mlrose_hiive
 import matplotlib.pyplot as plt
+import pandas as pd
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
@@ -8,28 +9,34 @@ from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_t
     plot_hyperparam_dict_generic, plot_helper
 
 
-N_JOBS = 4
+N_JOBS = 7
 
 
 class HyperTester(object):
-    def __init__(self, problem_constructor, dataset):
+    def __init__(self, problem_constructor, dataset, n_runs=3):
         self.ProblemConstructor = problem_constructor
         self.Dataset = dataset
+        self.N_Runs = n_runs
+        return
 
     def generic_hyperparam_multi(self, problem, init_state, function, params, legend_base_label, filename_base, dataset):
         fitness_curve_dict = {}
 
+        for p in params:
+            fitness_curve_dict[str(p)] = []
+
         inputs = tqdm(params)
 
-        processed_list_all = Parallel(n_jobs=N_JOBS)(delayed(function)(i, problem, init_state) for i in inputs)
+        for _ in range(0, self.N_Runs):
 
-        for res in processed_list_all:
-            fitness_curve_dict[res[0]] = res[1]
+            processed_list_all = Parallel(n_jobs=N_JOBS)(delayed(function)(i, problem, init_state) for i in inputs)
+
+            for res in processed_list_all:
+                fitness_curve_dict[res[0]].append(res[1][:, 0]) # TODO split this to just grab fitness
 
         # plotting
         plot_hyperparam_dict_generic(fitness_curve_dict, label=legend_base_label)
         plot_helper('', dataset + '_hyperparam' + filename_base, dataset)
-
 
     def hyperparam_rhc(self, problem, init_state):
         num_restarts = [0, 4, 8, 12, 16]
