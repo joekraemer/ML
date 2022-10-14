@@ -73,6 +73,13 @@ class GenericTester(object):
                 delayed(self._run_single_complexity)(i, n) for i in inputs)
             print("all complete")
 
+            # peel off the evals first
+            for run in processed_list_all:
+                evals_rhc = run[:, 8]
+                diff = np.diff(evals_rhc)
+                avg = diff.mean()
+                std = diff.std()
+
             as_array = np.array(processed_list_all)
 
             evals = as_array[:, 8]
