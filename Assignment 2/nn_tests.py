@@ -121,7 +121,8 @@ class NNTester(object):
 
         print("Starting Tests....")
 
-        self.exp_loss_curve(ds_red_wine)
+        #self.exp_loss_curve(ds_red_wine)
+        self.exp_learning_curve_all_algos(ds_red_wine)
         self.exp_scalability(ds_red_wine)
 
         self.exp_loss_curve(ds_diabetic)
@@ -158,7 +159,7 @@ class NNTester(object):
         )
 
         for e in res['estimator']:
-            loss_curves.append(e.fitness_curve)
+            loss_curves.append(e.fitness_curve[:, 0])
 
         return loss_curves
 
@@ -176,6 +177,34 @@ class NNTester(object):
             loss_curves_dict[algo.ShortName] = loss_curves
 
         plot_loss_curves(loss_curves_dict, ds.name)
+        return
+
+    def exp_learning_curve_all_algos(self, ds):
+        for algo in self.BackpropAlgos:
+            self.exp_learning_curve(ds, algo)
+
+    def exp_learning_curve(self, ds, algo):
+        train_sizes = np.linspace(0.1, 1.0, 4)
+
+        sss = StratifiedShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
+
+        temp_learner = algo.construct_learner()
+
+        train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
+            temp_learner,
+            ds.train_x,
+            ds.train_y,
+            scoring="f1_weighted",
+            cv=sss,
+            n_jobs=self.N_Jobs,
+            train_sizes=train_sizes,
+            return_times=True,
+        )
+
+        fit_times_ms = fit_times * 1000
+
+        plot_learning_curve(train_scores, test_scores, train_sizes, algo.ShortName, folder='nn_' + ds.name)
+        plot_scalability(fit_times_ms, train_sizes, algo.ShortName, folder='nn_' + ds.name)
         return
 
 

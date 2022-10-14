@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
-    plot_hyperparam_dict_generic, plot_helper
+    plot_hyperparam_dict_generic, plot_helper, plot_lc_fitness_vs_evals
 from tests.hyperparameter_tester import HyperTester
 
 
@@ -74,18 +74,13 @@ class GenericTester(object):
             print("all complete")
 
             # peel off the evals first
-            for run in processed_list_all:
-                evals_rhc = run[:, 8]
-                diff = np.diff(evals_rhc)
-                avg = diff.mean()
-                std = diff.std()
+            # for run in processed_list_all:
+            #    evals_rhc = run[:, 8]
+            #    diff = np.diff(evals_rhc)
+            #    avg = diff.mean()
+            #    std = diff.std()
 
             as_array = np.array(processed_list_all)
-
-            evals = as_array[:, 8]
-            diff = np.diff(evals)
-            avg = diff.mean()
-            std = diff.std()
 
             fitness_dict["rhc"].append(as_array[:, 4])
             fitness_dict["sa"].append(as_array[:, 5])
@@ -164,6 +159,7 @@ class GenericTester(object):
 
         plot_lc_iterations(fitness_dict, self.Name)
         plot_lc_evaluations(evaluations_dict, self.Name)
+        plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
 
     def _run_single_iterations(self, seed_offset):
         problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)

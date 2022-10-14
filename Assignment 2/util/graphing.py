@@ -22,8 +22,10 @@ def _draw_variance_curve(ax, df, x=None, label=''):
     return
 
 
-def plot_algo_dict_generic_with_variance(data_dict, x=None):
+def plot_algo_dict_generic_with_variance(data_dict, x=None, height=3, width=5):
     fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
 
     rhc = pd.DataFrame(data_dict['rhc'])
     sa = pd.DataFrame(data_dict['sa'])
@@ -59,8 +61,10 @@ def plot_algo_dict_generic(dict, x=None):
     return
 
 
-def plot_hyperparam_dict_generic(hyper_dict, label):
+def plot_hyperparam_dict_generic(hyper_dict, label, height=3, width=5):
     fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
 
     for key, item in hyper_dict.items():
         df = pd.DataFrame(item)
@@ -73,8 +77,11 @@ def plot_hyperparam_dict_generic(hyper_dict, label):
     return
 
 
-def plot_loss_curves(loss_dict, dataset):
+def plot_loss_curves(loss_dict, dataset, height=3, width=5):
     fig, ax = plt.subplots()
+    fig.set_figheight(height)
+    fig.set_figwidth(width)
+
     rhc = pd.DataFrame(loss_dict['rhc'])
     sa = pd.DataFrame(loss_dict['sa'])
     ga = pd.DataFrame(loss_dict['ga'])
@@ -103,6 +110,29 @@ def plot_lc_evaluations(evaluations_dict, dataset):
     return
 
 
+def plot_lc_fitness_vs_evals(fitness_dict, evals_dict, dataset):
+    plt.figure()
+
+    rhc = fitness_dict['rhc'][0]
+    rhc_x = evals_dict['rhc'][0]
+    sa = fitness_dict['sa'][0]
+    sa_x = evals_dict['sa'][0]
+    ga = fitness_dict['ga'][0]
+    ga_x = evals_dict['ga'][0]
+    mimic = fitness_dict['mimic'][0]
+    mimic_x = evals_dict['mimic'][0]
+
+    plt.plot(rhc_x, rhc, label='Randomized Hill Climb')
+    plt.plot(sa_x, sa, label='Simulated Annealing')
+    plt.plot(ga_x, ga, label='Genetic Algorithm')
+    plt.plot(mimic_x, mimic, label='MIMIC')
+
+    plt.xlabel('# of Function Evaluations')
+    plt.ylabel('Fitness')
+    plt.legend()
+    plot_helper('', dataset + '_fitness_vs_evaluations', dataset)
+
+
 def plot_lc_iterations(iterations_dict, dataset):
     plt.figure()
     plot_algo_dict_generic_with_variance(iterations_dict)
@@ -114,10 +144,13 @@ def plot_lc_iterations(iterations_dict, dataset):
     return
 
 
-def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename):
+def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename, height=3, width=5):
     # catch when we are trying to plot variance
     if type(data_dict['rhc']) == list:
         fig, ax = plot_algo_dict_generic_with_variance(data_dict, x)
+        fig.set_figheight(height)
+        fig.set_figwidth(width)
+
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.legend(loc="best")
