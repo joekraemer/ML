@@ -7,8 +7,8 @@ from kcolor import KColor
 from nn_tests import NNTester, NNGridSearchExecutor
 from util import loading_data
 
-if __name__ == '__main__':
 
+def run():
     start = time.time()
 
     tester = FourPeaks()
@@ -39,3 +39,6 @@ if __name__ == '__main__':
     total_time = time.time() - start
     print("Total Run Time:", total_time)
 
+
+if __name__ == '__main__':
+    run()
