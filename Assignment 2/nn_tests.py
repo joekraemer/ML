@@ -234,6 +234,7 @@ class NNBuilder(object):
         default_params = {
             'seed': 123456,
             'max_attempts': 500,
+            'restarts': 10,
             'cv': 5,
         }
 
@@ -362,11 +363,13 @@ if __name__ == "__main__":
 
     print("Starting Tests....")
 
+    tester = NNTester(n_jobs=7, debug=False)
+    tester.run(ds_red_wine)
+
     # Run GS on NN algos to try to get somekind of results
     rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=False)
     rw_grid_search.run_all_grid_searches()
 
-    tester = NNTester(n_jobs=7, debug=True)
-    tester.run(ds_red_wine)
+
 
 

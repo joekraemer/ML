@@ -12,6 +12,12 @@ from util.logging_tables import log_evals_table
 from tests.hyperparameter_tester import HyperTester
 
 
+def calc_max_attempts(complexity):
+
+    \ln n + 0.577 + \frac{1}{2n} + frac{\pi^2}{6}n^2
+
+
+
 class GenericTester(object):
     def __init__(self, name, complexity_list=range(25, 250, 40), aws=False, debug=False):
         num_cores = multiprocessing.cpu_count()
@@ -38,6 +44,9 @@ class GenericTester(object):
         return problem, init_state
 
     def run_best_rhc(self, problem, init_state, curve=True):
+
+        # max_attempts = calc_max_attempts(problem.complexity)
+
         return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=20000, restarts=10,
                                               init_state=init_state, curve=curve)
 
