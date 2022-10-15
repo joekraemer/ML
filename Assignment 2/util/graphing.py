@@ -24,8 +24,6 @@ def _draw_variance_curve(ax, df, x=None, label=''):
 
 def plot_algo_dict_generic_with_variance(data_dict, x=None, height=3.5, width=5):
     fig, ax = plt.subplots()
-    fig.set_figheight(height)
-    fig.set_figwidth(width)
 
     rhc = pd.DataFrame(data_dict['rhc'])
     sa = pd.DataFrame(data_dict['sa'])
@@ -63,8 +61,6 @@ def plot_algo_dict_generic(dict, x=None):
 
 def plot_hyperparam_dict_generic(hyper_dict, label, height=3.5, width=5):
     fig, ax = plt.subplots()
-    fig.set_figheight(height)
-    fig.set_figwidth(width)
 
     for key, item in hyper_dict.items():
         df = pd.DataFrame(item)
@@ -79,8 +75,6 @@ def plot_hyperparam_dict_generic(hyper_dict, label, height=3.5, width=5):
 
 def plot_loss_curves(loss_dict, dataset, height=3.5, width=5):
     fig, ax = plt.subplots()
-    fig.set_figheight(height)
-    fig.set_figwidth(width)
 
     rhc = pd.DataFrame(loss_dict['rhc'])
     sa = pd.DataFrame(loss_dict['sa'])
@@ -148,8 +142,6 @@ def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename
     # catch when we are trying to plot variance
     if type(data_dict['rhc']) == list:
         fig, ax = plot_algo_dict_generic_with_variance(data_dict, x)
-        fig.set_figheight(height)
-        fig.set_figwidth(width)
 
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -185,8 +177,6 @@ def plot_time_vs_complexity(time_dict, x, dataset):
 
 def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=3.5, width=5):
     fig, ax = plt.subplots()
-    fig.set_figheight(height)
-    fig.set_figwidth(width)
 
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
@@ -223,11 +213,9 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     return
 
 
-def plot_scalability(fit_times, train_sizes, name, folder, height=3.5, width=5):
+def plot_scalability(fit_times, train_sizes, name, folder, height, width=5):
     # Plot Scalability
     fig, ax = plt.subplots()
-    fig.set_figheight(height)
-    fig.set_figwidth(width)
 
     fit_times_mean = np.mean(fit_times, axis=1)
     fit_times_std = np.std(fit_times, axis=1)
