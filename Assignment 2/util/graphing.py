@@ -22,7 +22,7 @@ def _draw_variance_curve(ax, df, x=None, label=''):
     return
 
 
-def plot_algo_dict_generic_with_variance(data_dict, x=None, height=3, width=5):
+def plot_algo_dict_generic_with_variance(data_dict, x=None, height=3.5, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -61,7 +61,7 @@ def plot_algo_dict_generic(dict, x=None):
     return
 
 
-def plot_hyperparam_dict_generic(hyper_dict, label, height=3, width=5):
+def plot_hyperparam_dict_generic(hyper_dict, label, height=3.5, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -77,7 +77,7 @@ def plot_hyperparam_dict_generic(hyper_dict, label, height=3, width=5):
     return
 
 
-def plot_loss_curves(loss_dict, dataset, height=3, width=5):
+def plot_loss_curves(loss_dict, dataset, height=3.5, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -144,7 +144,7 @@ def plot_lc_iterations(iterations_dict, dataset):
     return
 
 
-def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename, height=3, width=5):
+def plot_generic_multi_algo_dict(data_dict, x, dataset, xlabel, ylabel, filename, height=3.5, width=5):
     # catch when we are trying to plot variance
     if type(data_dict['rhc']) == list:
         fig, ax = plot_algo_dict_generic_with_variance(data_dict, x)
@@ -183,7 +183,7 @@ def plot_time_vs_complexity(time_dict, x, dataset):
     return
 
 
-def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=3, width=5):
+def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, height=3.5, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -223,7 +223,7 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     return
 
 
-def plot_scalability(fit_times, train_sizes, name, folder, height=3, width=5):
+def plot_scalability(fit_times, train_sizes, name, folder, height=3.5, width=5):
     # Plot Scalability
     fig, ax = plt.subplots()
     fig.set_figheight(height)

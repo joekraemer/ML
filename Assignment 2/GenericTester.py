@@ -25,19 +25,19 @@ class GenericTester(object):
         return problem, init_state
 
     def run_best_rhc(self, problem, init_state, curve=True):
-        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=10000, restarts=10,
+        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=20000, restarts=10,
                                               init_state=init_state, curve=curve)
 
     def run_best_sa(self, problem, init_state, curve=True):
         return mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.ExpDecay(),
-                                                max_attempts=1000, max_iters=100000,
+                                                max_attempts=1000, max_iters=20000,
                                                 init_state=init_state, curve=curve)
 
     def run_best_ga(self, problem, init_state, curve=True):
-        return mlrose_hiive.genetic_alg(problem, max_attempts=100, max_iters=10000, curve=curve)
+        return mlrose_hiive.genetic_alg(problem, max_attempts=500, max_iters=20000, curve=curve)
 
     def run_best_mimic(self, problem, init_state, curve=True):
-        return mlrose_hiive.mimic(problem, pop_size=150, max_attempts=100, max_iters=10000,
+        return mlrose_hiive.mimic(problem, pop_size=150, max_attempts=500, max_iters=20000,
                                   curve=curve)
 
     def run(self):

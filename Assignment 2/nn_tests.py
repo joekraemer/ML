@@ -22,7 +22,7 @@ class NNAlgo(object):
         if default_params is None:
             default_params = {}
 
-        self.NNStructure = [30]
+        self.NNStructure = [50,50,50]
         self.LearningRate = learning_rate
         self.BackpropAlgo = backprop_algo
         self.MaxIterations = max_iterations
@@ -32,7 +32,7 @@ class NNAlgo(object):
             'max_iters': [2000],
             'learning_rate_init': [0.1, 0.2, 0.4, 0.8],
             'learning_rate': [1e-5, 1e-3, 1e-2],
-            'hidden_layer_sizes': [[30]],
+            'hidden_layer_sizes': [[50,50,50]],
             'activation': [mlrose_hiive.neural.activation.relu],
         }
 
