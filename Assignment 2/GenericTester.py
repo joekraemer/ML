@@ -55,7 +55,6 @@ class GenericTester(object):
         print(self.Name + " Hyperparameters Completed")
         return
 
-
     def runners_learning_curves(self):
         # I want to each type of algo multiple times so that the learning curves show variance
         # processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(self._run_single_complexity)(i) for i in inputs)
@@ -152,9 +151,16 @@ class GenericTester(object):
             "mimic": [],
         }
 
+        times_dict = {
+            "rhc": [],
+            "sa": [],
+            "ga": [],
+            "mimic": [],
+        }
+
         processed_list_all = Parallel(n_jobs=self.N_Jobs)(
             delayed(self._run_single_iterations)(i) for i in inputs)
-        print("all complete")
+        print("All iterations experiments complete")
 
         for run_res in processed_list_all:
             fitness_dict["rhc"].append(run_res[0])
@@ -167,6 +173,12 @@ class GenericTester(object):
             evaluations_dict["ga"].append(run_res[6])
             evaluations_dict["mimic"].append(run_res[7])
 
+            times_dict["rhc"].append(run_res[8])
+            times_dict["sa"].append(run_res[9])
+            times_dict["ga"].append(run_res[10])
+            times_dict["mimic"].append(run_res[11])
+
+        #log_eval_table(evaluations_dict, times_dict)
         plot_lc_iterations(fitness_dict, self.Name)
         plot_lc_evaluations(evaluations_dict, self.Name)
         plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
@@ -174,18 +186,29 @@ class GenericTester(object):
     def _run_single_iterations(self, seed_offset):
         problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
 
+        start = time.time()
         _, _, fc_rhc = self.run_best_rhc(problem, init_state, curve=True)
+        rhc_time = time.time() - start
         print("Done with RHC iterations!")
+
+        start = time.time()
         _, _, fc_sa = self.run_best_sa(problem, init_state, curve=True)
+        sa_time = time.time() - start
         print("Done with SA iterations!")
+
+        start = time.time()
         _, _, fc_ga = self.run_best_ga(problem, init_state, curve=True)
+        ga_time = time.time() - start
         print("Done with GA iterations!")
+
+        start = time.time()
         _, _, fc_mimic = self.run_best_mimic(problem, init_state, curve=True)
+        mimic_time = time.time() - start
         print("Done with MIMIC iterations!")
 
         # (column 0 is fitness per iteration and column 1 is total evaluations per iteration)
         return fc_rhc[:, 0], fc_sa[:, 0], fc_ga[:, 0], fc_mimic[:, 0], fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[
-                                                                                                               :, 1]
+                                                                                                               :, 1], rhc_time, sa_time, ga_time, mimic_time
 
     def run_hyperparameters(self):
         hyperTester = HyperTester(self.problem_constructor, self.Name)

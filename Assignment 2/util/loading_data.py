@@ -137,7 +137,7 @@ def load_cardio():
     return ds
 
 def load_diabetic():
-    data = arff.loadarff(root_dir + 'ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
+    data = arff.loadarff(root_dir + 'Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
     data_df = pd.DataFrame(data).astype(float)
 
     data = data_df.to_numpy()
