@@ -125,7 +125,8 @@ class NNTester(object):
         self.exp_learning_curve_all_algos(ds_red_wine)
         self.exp_scalability(ds_red_wine)
 
-        self.exp_loss_curve(ds_diabetic)
+        #self.exp_loss_curve(ds_diabetic)
+        self.exp_learning_curve_all_algos(ds_diabetic)
         self.exp_scalability(ds_diabetic)
         return
 
@@ -315,8 +316,8 @@ class NNBuilder(object):
         grid_search_params = {
             'max_iters': [2000],
             'learning_rate': [1e-5, 1e-3, 1e-2],
-            'mutation_prob': [0.05, 0.1, 0.2],
-            'pop_size': [50, 200, 400],
+            'mutation_prob': [0.05, 0.2, 0.5],
+            'pop_size': [150, 200, 300],
         }
 
         default_params = {
