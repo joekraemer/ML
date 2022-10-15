@@ -5,7 +5,7 @@ from GenericTester import GenericTester
 
 class KColor(GenericTester):
     def __init__(self):
-        super().__init__(name='kcolor', complexity_list=range(10, 150, 50))
+        super().__init__(name='kcolors', complexity_list=range(10, 150, 50))
 
     def problem_constructor(self, complexity=20, seed=123456):
         max_connections = int(complexity / 5)

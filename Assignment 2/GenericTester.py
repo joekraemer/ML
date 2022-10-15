@@ -4,6 +4,7 @@ import mlrose_hiive
 import time
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import multiprocessing
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
     plot_hyperparam_dict_generic, plot_helper, plot_lc_fitness_vs_evals
@@ -11,9 +12,13 @@ from tests.hyperparameter_tester import HyperTester
 
 
 class GenericTester(object):
-    def __init__(self, name, n_jobs=7, complexity_list=range(25, 250, 40)):
+    def __init__(self, name, complexity_list=range(25, 250, 40), aws=False):
+        num_cores = multiprocessing.cpu_count()
         self.Name = name
-        self.N_Jobs = n_jobs
+        if aws:
+            self.N_Jobs = num_cores
+        else:
+            self.N_Jobs = num_cores - 1
         self.ComplexityList = complexity_list
         self.Seed = 123456
         return
@@ -41,10 +46,15 @@ class GenericTester(object):
                                   curve=curve)
 
     def run(self):
+        print("Running " + self.Name)
         self.run_experiment_complexity()
+        print(self.Name + " Complexity Completed")
         self.run_experiment_iterations()
+        print(self.Name + " Iterations Completed")
         self.run_hyperparameters()
+        print(self.Name + " Hyperparameters Completed")
         return
+
 
     def runners_learning_curves(self):
         # I want to each type of algo multiple times so that the learning curves show variance

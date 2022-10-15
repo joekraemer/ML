@@ -7,6 +7,10 @@ from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import OneHotEncoder
 
 
+# root_dir = '/root/ML/Assignment 2'
+root_dir = '/Users/wchen/PycharmProjects/ML/'
+
+
 class Dataset(object):
     def __init__(self, train_x, train_y, test_x, test_y, name):
         self.train_x = train_x
@@ -18,7 +22,7 @@ class Dataset(object):
 
 
 def load_lung_cancer(split=0.75):
-    data_df = pd.read_csv('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/survey lung cancer.csv')
+    data_df = pd.read_csv(root_dir + 'Assignment1/Code/Datasets/survey lung cancer.csv')
     data = data_df.to_numpy()
 
     # convert YES/NO strings to 1 or 0
@@ -86,12 +90,12 @@ def load_wine(path, name):
 
 
 def load_red_wine():
-    red_wine_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Wine/winequality-red.csv'
+    red_wine_path = root_dir + 'Assignment1/Code/Datasets/Wine/winequality-red.csv'
     return load_wine(red_wine_path, 'red_wine')
 
 
 def load_white_wine():
-    red_wine_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Wine/winequality-white.csv'
+    red_wine_path = root_dir + 'Assignment1/Code/Datasets/Wine/winequality-white.csv'
     return load_wine(red_wine_path, 'White Wine')
 
 
@@ -133,7 +137,7 @@ def load_cardio():
     return ds
 
 def load_diabetic():
-    data = arff.loadarff('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
+    data = arff.loadarff(root_dir + 'ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
     data_df = pd.DataFrame(data).astype(float)
 
     data = data_df.to_numpy()

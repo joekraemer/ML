@@ -213,7 +213,7 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     return
 
 
-def plot_scalability(fit_times, train_sizes, name, folder, height, width=5):
+def plot_scalability(fit_times, train_sizes, name, folder):
     # Plot Scalability
     fig, ax = plt.subplots()
 
