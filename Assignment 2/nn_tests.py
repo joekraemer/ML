@@ -9,6 +9,7 @@ import os
 from mlrose_hiive.runners import SKMLPRunner, NNGSRunner
 
 from util import loading_data
+from util.logging_tables import logging_scoring_metrics
 from util.graphing import plot_learning_curve, plot_scalability, plot_loss_curves
 from sklearn.metrics import f1_score, accuracy_score, classification_report
 
@@ -16,7 +17,7 @@ from sklearn.model_selection import learning_curve, StratifiedShuffleSplit, cros
 
 
 class NNAlgo(object):
-    def __init__(self, backprop_algo='random_hill_climb', short_name='rhc', learning_rate=1e-5, max_iterations=3000,
+    def __init__(self, backprop_algo='random_hill_climb', short_name='rhc', full_algo=mlrose_hiive.algorithms.rhc.random_hill_climb , learning_rate=1e-5, max_iterations=3000,
                  grid_search_params=None, default_params=None, debug=False):
         if grid_search_params is None:
             grid_search_params = {}
@@ -28,14 +29,15 @@ class NNAlgo(object):
         else:
             self.NNStructure = [50, 50, 50]
 
+        self.FullAlgo = full_algo
         self.LearningRate = learning_rate
         self.BackpropAlgo = backprop_algo
         self.MaxIterations = max_iterations
         self.ShortName = short_name
 
         base_default_grid_search_params = {
-            'max_iters': [2000],
-            'learning_rate_init': [0.1],
+            'max_iters': [5000],
+            'learning_rate_init': [0.5],
             'learning_rate': [1e-5, 1e-4, 1e-2],
             'hidden_layer_sizes': [self.NNStructure],
             'activation': [mlrose_hiive.neural.activation.relu],
@@ -43,7 +45,7 @@ class NNAlgo(object):
 
         base_default_params = {
             'seed': 123456,
-            'iteration_list': [2000],
+            'iteration_list': [5000],
             'max_attempts': 500,
             'n_jobs': 7,
             'cv': 5,
@@ -65,7 +67,7 @@ class NNAlgo(object):
         experiment_name = 'nngs_' + self.BackpropAlgo
         cx_skr = NNGSRunner(x_train=ds.train_x, y_train=ds.train_y,
                             x_test=ds.test_x, y_test=ds.test_y,
-                            algorithm=mlrose_hiive.algorithms.sa.simulated_annealing,
+                            algorithm=self.FullAlgo,
                             experiment_name=experiment_name,
                             grid_search_parameters=self.GridSearchParams,
                             **self.Params)
@@ -73,37 +75,13 @@ class NNAlgo(object):
         run_stats_df, curves_df, cv_results_df, cx_sr = cx_skr.run()
 
         y_pred = cx_sr.predict(ds.test_x)
-        print(classification_report(pd.get_dummies(ds.test_y.values.ravel()).values, y_pred))
-
         y_pred_train = cx_sr.predict(ds.train_x)
-        print(classification_report(pd.get_dummies(ds.train_y.values.ravel()).values, y_pred_train))
+        test = [classification_report(ds.test_y, y_pred)]
+        train = [classification_report(ds.train_y, y_pred_train)]
+        logging_scoring_metrics(test, folder='nn_' + ds.name, name=self.ShortName + '_test')
+        logging_scoring_metrics(train, folder='nn_' + ds.name, name=self.ShortName + '_train')
 
         return run_stats_df, curves_df, cv_results_df, cx_sr
-
-    def run_skmlp_grid_search(self, ds):
-        skmlp_grid_search_parameters = {
-            **self.DefaultGridSearchParams,
-            'max_iters': [5000],
-            'learning_rate_init': [0.0001],
-            'activation': [mlrose_hiive.neural.activation.sigmoid],
-        }
-
-        skmlp_default_parameters = {
-            **self.DefaultParams,
-            'early_stopping': True,
-            'tol': 1e-05,
-            'alpha': 0.001,
-            'solver': 'lbfgs',
-        }
-
-        cx_skr = SKMLPRunner(x_train=ds.train_x, y_train=ds.train_y,
-                             x_test=ds.test_x, y_test=ds.test_y,
-                             experiment_name='skmlp_clean',
-                             grid_search_parameters=skmlp_grid_search_parameters,
-                             **skmlp_default_parameters)
-
-        run_stats_df, curves_df, cv_results_df, cx_sr = cx_skr.run()
-        return
 
 
 class NNTester(object):
@@ -232,12 +210,12 @@ class NNBuilder(object):
 
         default_params = {
             'seed': 123456,
-            'iteration_list': 2 ** np.arange(13),
             'max_attempts': 500,
             'cv': 5,
         }
 
         algo = NNAlgo(backprop_algo='gradient_descent',
+                      full_algo=mlrose_hiive.algorithms.gd.gradient_descent,
                       short_name='gd',
                       learning_rate=1e-3,
                       max_iterations=2000,
@@ -260,6 +238,7 @@ class NNBuilder(object):
         }
 
         algo = NNAlgo(backprop_algo='random_hill_climb',
+                      full_algo=mlrose_hiive.algorithms.rhc.random_hill_climb,
                       short_name='rhc',
                       learning_rate=1e-5,
                       max_iterations=2000,
@@ -285,6 +264,7 @@ class NNBuilder(object):
         }
 
         algo = NNAlgo(backprop_algo='simulated_annealing',
+                      full_algo=mlrose_hiive.algorithms.sa.simulated_annealing,
                       short_name='sa',
                       learning_rate=1e-5,
                       max_iterations=2000,
@@ -383,7 +363,7 @@ if __name__ == "__main__":
     print("Starting Tests....")
 
     # Run GS on NN algos to try to get somekind of results
-    rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=True)
+    rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=False)
     rw_grid_search.run_all_grid_searches()
 
     tester = NNTester(n_jobs=7, debug=True)

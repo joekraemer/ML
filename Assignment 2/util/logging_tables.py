@@ -61,10 +61,8 @@ def log_evals_table(evals_dict, times_dict, name):
 
 
 def logging_scoring_metrics(lines, folder, name):
-
     save_table_to_file(lines, folder=folder, filename= name + '_gs_scoring_metrics_')
-
-
+    return
 
 def save_table_to_file(lines, folder, filename):
     root_dir = Path(".")
