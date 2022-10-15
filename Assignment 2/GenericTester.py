@@ -46,6 +46,7 @@ class GenericTester(object):
                                   curve=curve)
 
     def run(self):
+        start = time.time()
         print("Running " + self.Name)
         self.run_experiment_complexity()
         print(self.Name + " Complexity Completed")
@@ -53,6 +54,8 @@ class GenericTester(object):
         print(self.Name + " Iterations Completed")
         self.run_hyperparameters()
         print(self.Name + " Hyperparameters Completed")
+        total_time = time.time() - start
+        print(self.Name + "Run Time:", total_time)
         return
 
     def runners_learning_curves(self):
