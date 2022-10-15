@@ -51,7 +51,7 @@ class GenericTester(object):
         # processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(self._run_single_complexity)(i) for i in inputs)
         return
 
-    def run_experiment_complexity(self, number_of_runs=3):
+    def run_experiment_complexity(self, number_of_runs=10):
         inputs = tqdm(self.ComplexityList)
 
         fitness_dict = {
@@ -124,7 +124,7 @@ class GenericTester(object):
         return [rhc_time, sa_time, ga_time, mimic_time, best_fitness_rhc, best_fitness_sa, best_fitness_ga,
                 best_fitness_mimic, fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[:, 1]]
 
-    def run_experiment_iterations(self, number_of_runs=3):
+    def run_experiment_iterations(self, number_of_runs=10):
         inputs = tqdm(range(0, number_of_runs))
 
         ## Plot change with respect to iterations

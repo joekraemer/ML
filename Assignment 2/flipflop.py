@@ -6,9 +6,9 @@ from GenericTester import GenericTester
 
 class FlipFlop(GenericTester):
     def __init__(self):
-        super().__init__(name='flipflop', complexity_list=range(25, 200, 50))
+        super().__init__(name='flipflop', complexity_list=range(100, 300, 70))
 
-    def problem_constructor(self, complexity=150, seed=123456):
+    def problem_constructor(self, complexity=180, seed=123456):
         problem = FlipFlopGenerator().generate(seed=123456, size=complexity)
         problem.set_mimic_fast_mode(True)
         init_state = np.random.randint(2, size=complexity)
