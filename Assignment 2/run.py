@@ -36,6 +36,7 @@ def run():
     tester = KColor()
     tester.run()
 
+    # LOCKED IN USE
     tester = FlipFlop()
     tester.run()
 

@@ -8,11 +8,12 @@ import multiprocessing
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
     plot_hyperparam_dict_generic, plot_helper, plot_lc_fitness_vs_evals
+from util.logging_tables import log_evals_table
 from tests.hyperparameter_tester import HyperTester
 
 
 class GenericTester(object):
-    def __init__(self, name, complexity_list=range(25, 250, 40), aws=False):
+    def __init__(self, name, complexity_list=range(25, 250, 40), aws=False, debug=False):
         num_cores = multiprocessing.cpu_count()
         self.Name = name
         if aws:
@@ -21,6 +22,13 @@ class GenericTester(object):
             self.N_Jobs = num_cores - 1
         self.ComplexityList = complexity_list
         self.Seed = 123456
+        self.Debug = debug
+
+        if self.Debug:
+            self.NumberOfRuns = 2
+        else:
+            self.NumberOfRuns = 10
+
         return
 
     @abstractmethod
@@ -54,8 +62,11 @@ class GenericTester(object):
         print(self.Name + " Iterations Completed")
         self.run_hyperparameters()
         print(self.Name + " Hyperparameters Completed")
+        self.run_extra()
+        print(self.Name + " Extra Tests Completed")
         total_time = time.time() - start
         print(self.Name + "Run Time:", total_time)
+
         return
 
     def runners_learning_curves(self):
@@ -63,7 +74,7 @@ class GenericTester(object):
         # processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(self._run_single_complexity)(i) for i in inputs)
         return
 
-    def run_experiment_complexity(self, number_of_runs=10):
+    def run_experiment_complexity(self):
         inputs = tqdm(self.ComplexityList)
 
         fitness_dict = {
@@ -80,7 +91,7 @@ class GenericTester(object):
             "mimic": [],
         }
 
-        for n in range(0, number_of_runs):
+        for n in range(0, self.NumberOfRuns):
             processed_list_all = Parallel(n_jobs=self.N_Jobs)(
                 delayed(self._run_single_complexity)(i, n) for i in inputs)
             print("all complete")
@@ -111,6 +122,7 @@ class GenericTester(object):
         return
 
     def _run_single_complexity(self, c, seed_offset):
+        seed_offset = seed_offset*1234
         problem, init_state = self.problem_constructor(c, self.Seed + seed_offset)
 
         start = time.time()
@@ -133,11 +145,16 @@ class GenericTester(object):
         mimic_time = time.time() - start
         print("MIMIC:", mimic_time, c)
 
+
+        # total_evals = fc[-1] - fc[0]
+        # total_iters =
+
+
         return [rhc_time, sa_time, ga_time, mimic_time, best_fitness_rhc, best_fitness_sa, best_fitness_ga,
                 best_fitness_mimic, fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[:, 1]]
 
-    def run_experiment_iterations(self, number_of_runs=10):
-        inputs = tqdm(range(0, number_of_runs))
+    def run_experiment_iterations(self):
+        inputs = tqdm(range(0, self.NumberOfRuns))
 
         ## Plot change with respect to iterations
         fitness_dict = {
@@ -181,39 +198,46 @@ class GenericTester(object):
             times_dict["ga"].append(run_res[10])
             times_dict["mimic"].append(run_res[11])
 
-        #log_eval_table(evaluations_dict, times_dict)
+        log_evals_table(evaluations_dict, times_dict, name=self.Name)
         plot_lc_iterations(fitness_dict, self.Name)
         plot_lc_evaluations(evaluations_dict, self.Name)
-        plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
+        #plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
 
     def _run_single_iterations(self, seed_offset):
-        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
-
+        seed_offset = seed_offset*1234
+        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset*1000)
         start = time.time()
         _, _, fc_rhc = self.run_best_rhc(problem, init_state, curve=True)
         rhc_time = time.time() - start
         print("Done with RHC iterations!")
 
+        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
         start = time.time()
         _, _, fc_sa = self.run_best_sa(problem, init_state, curve=True)
         sa_time = time.time() - start
         print("Done with SA iterations!")
 
+        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
         start = time.time()
         _, _, fc_ga = self.run_best_ga(problem, init_state, curve=True)
         ga_time = time.time() - start
         print("Done with GA iterations!")
 
+        problem, init_state = self.problem_constructor(seed=self.Seed + seed_offset)
         start = time.time()
         _, _, fc_mimic = self.run_best_mimic(problem, init_state, curve=True)
         mimic_time = time.time() - start
         print("Done with MIMIC iterations!")
 
         # (column 0 is fitness per iteration and column 1 is total evaluations per iteration)
-        return fc_rhc[:, 0], fc_sa[:, 0], fc_ga[:, 0], fc_mimic[:, 0], fc_rhc[:, 1], fc_sa[:, 1], fc_ga[:, 1], fc_mimic[
-                                                                                                               :, 1], rhc_time, sa_time, ga_time, mimic_time
+        return fc_rhc[:, 0], fc_sa[:, 0], fc_ga[:, 0], fc_mimic[:, 0], fc_rhc[:, 1], fc_sa[:, 1], \
+               fc_ga[:, 1], fc_mimic[:, 1], rhc_time, sa_time, ga_time, mimic_time
 
     def run_hyperparameters(self):
         hyperTester = HyperTester(self.problem_constructor, self.Name)
         hyperTester.run_hyperparameters()
+        return
+
+    @abstractmethod
+    def run_extra(self):
         return

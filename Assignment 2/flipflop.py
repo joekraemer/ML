@@ -5,10 +5,20 @@ from GenericTester import GenericTester
 
 
 class FlipFlop(GenericTester):
-    def __init__(self):
-        super().__init__(name='flipflop', complexity_list=range(100, 300, 70))
+    def __init__(self, debug=False):
+        if debug:
+            print("Debug mode")
+            self.Complexity = 30
+            complexity_list = range(10, 100, 30)
+        else:
+            self.Complexity = 180
+            complexity_list = range(100, 300, 70)
+        super().__init__(name='flipflop', complexity_list=complexity_list, debug=debug)
+        return
 
-    def problem_constructor(self, complexity=180, seed=123456):
+    def problem_constructor(self, complexity=None, seed=123456):
+        if complexity is None:
+            complexity = self.Complexity
         problem = FlipFlopGenerator().generate(seed=123456, size=complexity)
         problem.set_mimic_fast_mode(True)
         init_state = np.random.randint(2, size=complexity)
@@ -30,9 +40,14 @@ class FlipFlop(GenericTester):
         return mlrose_hiive.mimic(problem, pop_size=300, keep_pct=0.2, max_attempts=500, max_iters=20000,
                            curve=curve)
 
+    def run_extra(self):
+        # Run a test where GA uses uniform crossover instead
+        return
+
 
 if __name__ == "__main__":
-    tester = FlipFlop()
+    tester = FlipFlop(debug=True)
+    tester.run_experiment_iterations()
     tester.run()
 
 

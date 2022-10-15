@@ -10,7 +10,8 @@ from mlrose_hiive.runners import SKMLPRunner, NNGSRunner
 
 from util import loading_data
 from util.graphing import plot_learning_curve, plot_scalability, plot_loss_curves
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score, classification_report
+
 from sklearn.model_selection import learning_curve, StratifiedShuffleSplit, cross_validate, KFold
 
 
@@ -23,7 +24,7 @@ class NNAlgo(object):
             default_params = {}
 
         if debug:
-            self.NNStructure = [30]
+            self.NNStructure = [40, 40]
         else:
             self.NNStructure = [50, 50, 50]
 
@@ -42,7 +43,7 @@ class NNAlgo(object):
 
         base_default_params = {
             'seed': 123456,
-            'iteration_list': 2 ** np.arange(13),
+            'iteration_list': [2000],
             'max_attempts': 500,
             'n_jobs': 7,
             'cv': 5,
@@ -70,6 +71,13 @@ class NNAlgo(object):
                             **self.Params)
 
         run_stats_df, curves_df, cv_results_df, cx_sr = cx_skr.run()
+
+        y_pred = cx_sr.predict(ds.test_x)
+        print(classification_report(pd.get_dummies(ds.test_y.values.ravel()).values, y_pred))
+
+        y_pred_train = cx_sr.predict(ds.train_x)
+        print(classification_report(pd.get_dummies(ds.train_y.values.ravel()).values, y_pred_train))
+
         return run_stats_df, curves_df, cv_results_df, cx_sr
 
     def run_skmlp_grid_search(self, ds):
@@ -108,6 +116,11 @@ class NNTester(object):
 
         if self.Debug:
             self.N_Runs = 1
+            n_splits = 1
+        else:
+            n_splits = 3
+
+        self.SSS = StratifiedShuffleSplit(n_splits=n_splits, test_size=0.3, random_state=0)
 
         self._construct_algos()
         return
@@ -127,24 +140,10 @@ class NNTester(object):
 
         self.exp_loss_curve(ds_red_wine)
         self.exp_learning_curve_all_algos(ds)
-        self.exp_scalability(ds)
-        return
-
-    def _building_my_own_cv(self, ds):
-        """I hope it doens't come to this"""
-        sss = StratifiedShuffleSplit(n_splits=7, test_size=0.1, random_state=0)
-
-        for train_index, test_index in sss.split(ds.train_x, ds.train_y):
-            print("TRAIN:", train_index, "TEST:", test_index)
-            X_train, X_test = ds.train_x[train_index], ds.train_x[test_index]
-            y_train, y_test = ds.train_y[train_index], ds.train_y[test_index]
-
         return
 
     def _get_single_algo_loss_curve(self, ds, algo):
         loss_curves = []
-
-        sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=0)
 
         temp_learner = algo.construct_learner()
 
@@ -153,7 +152,7 @@ class NNTester(object):
             ds.train_x,
             ds.train_y,
             scoring="accuracy",
-            cv=sss,
+            cv=self.SSS,
             n_jobs=self.N_Jobs,
             return_train_score=True,
             return_estimator=True
@@ -199,8 +198,6 @@ class NNTester(object):
     def exp_learning_curve(self, ds, algo):
         train_sizes = np.linspace(0.1, 1.0, 4)
 
-        sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=0)
-
         temp_learner = algo.construct_learner()
 
         train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
@@ -208,7 +205,7 @@ class NNTester(object):
             ds.train_x,
             ds.train_y,
             scoring="f1_weighted",
-            cv=sss,
+            cv=self.SSS,
             n_jobs=self.N_Jobs,
             train_sizes=train_sizes,
             return_times=True,
@@ -221,39 +218,14 @@ class NNTester(object):
         return
 
 
-    def exp_scalability(self, ds, backprop_algo='gradient_descent'):
-        learner = mlrose_hiive.NeuralNetwork(hidden_nodes=self.NNStructure, algorithm=backprop_algo,
-                                             max_iters=self.MaxIterations, learning_rate=self.LearningRate, curve=True)
-        train_sizes = np.linspace(0.1, 1.0, 3)
-        validation_fold_iterator = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=0)
-
-        train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
-            learner,
-            ds.train_x,
-            ds.train_y,
-            scoring="accuracy",
-            cv=validation_fold_iterator,
-            n_jobs=self.N_Jobs,
-            train_sizes=train_sizes,
-            return_times=True,
-        )
-
-        fit_times_ms = fit_times * 1000
-
-        plot_learning_curve(train_scores, test_scores, train_sizes, backprop_algo, folder='nn_' + ds.name)
-        plot_scalability(fit_times_ms, train_sizes, backprop_algo, folder='nn_' + ds.name)
-        return
-
-
 class NNBuilder(object):
-    def __init__(self, debug):
+    def __init__(self, debug=False):
         self.Debug = debug
 
     def build_gradient_descent(self):
         # 'random_hill_climb', 'simulated_annealing', 'genetic_alg', 'gradient_descent'
 
         grid_search_params = {
-            'max_iters': [2000],
             'learning_rate_init': [0.5],
             'learning_rate': [1e-5, 1e-4, 1e-2],
         }
@@ -283,7 +255,6 @@ class NNBuilder(object):
 
         default_params = {
             'seed': 123456,
-            'iteration_list': 2 ** np.arange(13),
             'max_attempts': 500,
             'cv': 5,
         }
@@ -302,14 +273,12 @@ class NNBuilder(object):
         # 'random_hill_climb', 'simulated_annealing', 'genetic_alg', 'gradient_descent'
 
         grid_search_params = {
-            'max_iters': [2000],
             'learning_rate': [1e-5, 1e-3, 1e-2],
             'schedule': [mlrose_hiive.ExpDecay(), mlrose_hiive.GeomDecay(), mlrose_hiive.ArithDecay()]
         }
 
         default_params = {
             'seed': 123456,
-            'iteration_list': 2 ** np.arange(13),
             'max_attempts': 500,
             'n_jobs': 7,
             'cv': 5,
@@ -329,23 +298,23 @@ class NNBuilder(object):
         # 'random_hill_climb', 'simulated_annealing', 'genetic_alg', 'gradient_descent'
 
         grid_search_params = {
-            'max_iters': [2000],
-            'learning_rate': [1e-5, 1e-3, 1e-2],
-            'mutation_prob': [0.05, 0.2, 0.5],
+            'learning_rate': [1e-4, 1e-2, 1e-1],
+            'mutation_prob': [0.05, 0.1, 0.3],
             'pop_size': [50, 100, 200],
         }
 
         default_params = {
             'seed': 123456,
-            'iteration_list': 2 ** np.arange(13),
-            'max_attempts': 500,
+            'max_attempts': 200,
             'n_jobs': 7,
             'cv': 5,
+            'pop_size': 150,
+            'mutation_prob': 0.2,
         }
 
         algo = NNAlgo(backprop_algo='genetic_alg',
                       short_name='ga',
-                      learning_rate=1e-5,
+                      learning_rate=1e-2,
                       max_iterations=2000,
                       grid_search_params=grid_search_params,
                       default_params=default_params,
@@ -357,9 +326,9 @@ class NNBuilder(object):
 class NNGridSearchExecutor(object):
     """ Building this to handle all of the NN object creations and gridsearch parameters"""
 
-    def __init__(self, ds):
+    def __init__(self, ds, debug=False):
         self.Dataset = ds
-        self.Builder = NNBuilder()
+        self.Builder = NNBuilder(debug=debug)
         return
 
     def run_all_grid_searches(self):
@@ -413,9 +382,11 @@ if __name__ == "__main__":
 
     print("Starting Tests....")
 
+    # Run GS on NN algos to try to get somekind of results
+    rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=True)
+    rw_grid_search.run_all_grid_searches()
+
     tester = NNTester(n_jobs=7, debug=True)
     tester.run(ds_red_wine)
 
-    # Run GS on NN algos to try to get somekind of results
-    rw_grid_search = NNGridSearchExecutor(ds_red_wine)
-    rw_grid_search.run_all_grid_searches()
+
