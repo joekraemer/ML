@@ -46,11 +46,11 @@ class MaxKColorGenerator:
 
 class KColor(GenericTester):
     def __init__(self):
-        super().__init__(name='kcolors', complexity_list=range(20, 100, 25))
+        super().__init__(name='kcolors', complexity_list=range(10, 50, 20))
 
     def problem_constructor(self, complexity=50, seed=123456):
-        max_connections = int(complexity / 4)
-        problem = MaxKColorGenerator().generate(seed=123456, number_of_nodes=complexity, max_connections_per_node=max_connections)
+        max_connections = 3 # typically 1/5
+        problem = MaxKColorGenerator().generate(seed=123456, number_of_nodes=complexity, max_connections_per_node=max_connections, maximize=True)
         problem.set_mimic_fast_mode(True)
         init_state = np.random.randint(2, size=complexity)
         return problem, init_state

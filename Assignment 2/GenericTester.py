@@ -14,14 +14,14 @@ from tests.hyperparameter_tester import HyperTester
 
 
 def calc_max_attempts(n, sigmas=2):
-    expectation = n*(math.log(math.e) * n + 0.577216) + 0.5
+    expectation = n * (math.log(math.e) * n + 0.577216) + 0.5
 
     sigma = math.sqrt()
     sigma = (math.pi ** 2) / 6 * (n ** 2)
 
 
 def calc_sigma(p):
-    return math.sqrt((1-p)/(p**2))
+    return math.sqrt((1 - p) / (p ** 2))
 
 
 class GenericTester(object):
@@ -210,7 +210,11 @@ class GenericTester(object):
         log_evals_table(evaluations_dict, times_dict, name=self.Name)
         plot_lc_iterations(fitness_dict, self.Name)
         plot_lc_evaluations(evaluations_dict, self.Name)
-        plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
+        try:
+            plot_lc_fitness_vs_evals(fitness_dict, evaluations_dict, self.Name)
+        except:
+            print("Plotting Evals didn't work")
+        return
 
     def _run_single_iterations(self, seed_offset):
         seed_offset = seed_offset * 1234

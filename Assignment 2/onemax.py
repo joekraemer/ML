@@ -51,7 +51,7 @@ class OneMax(GenericTester):
 
 if __name__ == "__main__":
     tester = OneMax(debug=True)
-    tester.run_experiment_iterations()
+    tester.run_hyperparameters()
     tester.run()
 
 

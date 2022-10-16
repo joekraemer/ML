@@ -2,17 +2,33 @@ import numpy as np
 import mlrose_hiive
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
+import time
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import multiprocessing
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
     plot_hyperparam_dict_generic, plot_helper
+from util.logging_tables import save_obj_as_pickle
 
-N_JOBS = 7
+
+class HyperParamResult(object):
+    def __init__(self, fitness_dict, time_dict, problem_constructor, dataset, param):
+        self.TimeDict = time_dict
+        self.FitnessDict = fitness_dict
+        self.ProblemConstructor = problem_constructor
+        self.Dataset = dataset
+        self.Param = param
 
 
 class HyperTester(object):
-    def __init__(self, problem_constructor, dataset, n_runs=7, config=None):
+    def __init__(self, problem_constructor, dataset, n_runs=7, config=None, aws=False):
+        num_cores = multiprocessing.cpu_count()
+        if aws:
+            self.N_Jobs = num_cores
+        else:
+            self.N_Jobs = num_cores - 1
         self.ProblemConstructor = problem_constructor
         self.Dataset = dataset
         self.N_Runs = n_runs
@@ -33,22 +49,32 @@ class HyperTester(object):
     def generic_hyperparam_multi(self, function, params, legend_base_label, filename_base,
                                  dataset):
         fitness_curve_dict = {}
+        time_dict = {}
 
         for p in params:
             fitness_curve_dict[str(p)] = []
+            time_dict[str(p)] = []
 
         inputs = tqdm(params)
 
         for _ in range(0, self.N_Runs):
 
-            processed_list_all = Parallel(n_jobs=N_JOBS)(delayed(function)(i) for i in inputs)
+            processed_list_all = Parallel(n_jobs=self.N_Jobs)(delayed(function)(i) for i in inputs)
 
             for res in processed_list_all:
-                fitness_curve_dict[res[0]].append(res[1][:, 0])  # TODO split this to just grab fitness
+                fitness_curve_dict[res[0]].append(res[1][:, 0])
+                time_dict[res[0]].append(res[2])
+
+        full_res = HyperParamResult(fitness_dict=fitness_curve_dict, time_dict=time_dict, problem_constructor=self.ProblemConstructor, dataset=dataset, param=filename_base)
+
+        filename = dataset + '_hyperparam' + filename_base
+        folder = dataset
+
+        save_obj_as_pickle(full_res, folder, filename)
 
         # plotting
         plot_hyperparam_dict_generic(fitness_curve_dict, label=legend_base_label)
-        plot_helper('', dataset + '_hyperparam' + filename_base, dataset)
+        plot_helper('', filename, folder)
 
     def hyperparam_rhc(self):
         self.generic_hyperparam_multi(function=self.run_single_hyper_rhc, params=self.Hyper['num_restarts'],
@@ -61,10 +87,12 @@ class HyperTester(object):
     def run_single_hyper_rhc(self, r):
         problem, init_state = self.ProblemConstructor()
 
+        start = time.time()
         _, _, fitness_curve = mlrose_hiive.random_hill_climb(problem, restarts=r, max_attempts=1000,
                                                              max_iters=10000,
                                                              init_state=init_state, curve=True)
-        return str(r), fitness_curve
+        end = time.time() - start
+        return str(r), fitness_curve, end
 
     def hyperparam_sa(self):
         problem, init_state = self.ProblemConstructor()
@@ -107,19 +135,23 @@ class HyperTester(object):
 
     def run_single_hyper_ga_pop(self, pop):
         problem, init_state = self.ProblemConstructor()
+        start = time.time()
 
         _, _, fitness_curve = mlrose_hiive.genetic_alg(problem, mutation_prob=0.1, pop_size=pop,
                                                        max_attempts=1000,
                                                        max_iters=10000, curve=True)
-        return str(pop), fitness_curve
+        end = time.time() - start
+        return str(pop), fitness_curve, end
 
     def run_single_hyper_ga_mut(self, mut):
         problem, init_state = self.ProblemConstructor()
+        start = time.time()
 
         _, _, fitness_curve = mlrose_hiive.genetic_alg(problem, mutation_prob=mut, pop_size=100,
                                                        max_attempts=1000,
                                                        max_iters=10000, curve=True)
-        return str(mut), fitness_curve
+        end = time.time() - start
+        return str(mut), fitness_curve, end
 
     def hyperparam_mimic(self):
         self.generic_hyperparam_multi(function=self.run_single_hyper_mimic_pop, params=self.Hyper['mimic_pop_size'],
@@ -135,20 +167,22 @@ class HyperTester(object):
 
     def run_single_hyper_mimic_pop(self, pop):
         problem, init_state = self.ProblemConstructor()
+        start = time.time()
 
         _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=0.1, pop_size=pop, max_attempts=100,
                                                  max_iters=10000, curve=True)
-        return str(pop), fitness_curve
+        end = time.time() - start
+        return str(pop), fitness_curve, end
 
     def run_single_hyper_mimic_keep(self, keep):
         problem, init_state = self.ProblemConstructor()
-
+        start = time.time()
         _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=keep, pop_size=200, max_attempts=100,
                                                  max_iters=10000, curve=True)
-        return str(keep), fitness_curve
+        end = time.time() - start
+        return str(keep), fitness_curve, end
 
     def run_hyperparameters(self):
-
         self.hyperparam_rhc()
         self.hyperparam_sa()
         self.hyperparam_ga()

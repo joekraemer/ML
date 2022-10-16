@@ -1,6 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import pickle
 
 lines = ['Readme', 'How to write text files in Python']
 
@@ -51,11 +52,11 @@ def log_evals_table(evals_dict, times_dict, name):
         time_per_eval = (float(avg_time) / avg_total_evals) * 1000
         time_per_iteration = (float(avg_time) / avg_total_iterations) * 1000
 
-        avg_evals_per_iteration = avg_total_iterations / avg_total_evals
+        avg_evals_per_iteration = avg_total_evals / avg_total_iterations
 
         line = key + " & " + str(int(avg_total_evals)) + " & " + f'{float(avg_time):.2f}' + \
                " & " + f'{time_per_eval:.2f}' + " & " + f'{time_per_iteration:.2f}' + " & " \
-               + f'{float(avg_evals_per_iteration):.1f}' + " \\" + "\\"
+               + f'{avg_evals_per_iteration:.1f}' + " \\" + "\\"
 
         lines.append(line + "\\")
     # what I want is a table
@@ -80,3 +81,27 @@ def save_table_to_file(lines, folder, filename):
             f.write('\n')
 
     return
+
+
+def save_obj_as_pickle(object, folder, filename):
+    root_dir = Path(".")
+    path = root_dir / 'Graphs' / folder / (filename + ".pickle")
+
+    # Now just pickle this full_res object and worry about graphing and logging later
+    with open(path, 'wb') as f:
+        pickle.dump(object, f)
+
+    return
+
+
+def path_builder(dataset, filename, folder='Graphs'):
+    root_dir = Path(".")
+    path = root_dir / folder / dataset / (filename)
+    return path
+
+
+def load_obj_as_pickle(filepath):
+    with open(filepath, 'rb') as f:
+        object = pickle.load(f)
+
+    return object

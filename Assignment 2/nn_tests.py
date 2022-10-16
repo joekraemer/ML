@@ -290,6 +290,7 @@ class NNBuilder(object):
         }
 
         algo = NNAlgo(backprop_algo='genetic_alg',
+                      full_algo=mlrose_hiive.algorithms.ga.genetic_alg,
                       short_name='ga',
                       learning_rate=1e-2,
                       max_iterations=2000,

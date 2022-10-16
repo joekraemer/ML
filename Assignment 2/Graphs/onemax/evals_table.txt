@@ -1,0 +1,5 @@
+rhc & total evaluations & wall clock time (sec) & time/eval (ms) & time/iteration (ms) & evals/iteration
+rhc & 1089 & 1.40 & 1.29 & 1.31 & 1.0 \\\
+sa & 1378 & 0.22 & 0.16 & 0.17 & 0.9 \\\
+ga & 102516 & 41.94 & 0.41 & 82.08 & 0.0 \\\
+mimic & 101106 & 27.09 & 0.27 & 53.75 & 0.0 \\\
