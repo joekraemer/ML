@@ -8,6 +8,7 @@ class KnapSack(GenericTester):
     def __init__(self, debug=False):
         knapsack_hyper_tuning = {'ga_pop_size': [100, 300, 500],
                                  'mimic_pop_size': [100, 300, 500]}
+
         super().__init__(name='knapsack', complexity_list=range(5, 40, 10), debug=debug,
                          hyper_config=knapsack_hyper_tuning)
 
@@ -38,5 +39,5 @@ class KnapSack(GenericTester):
 
 
 if __name__ == "__main__":
-    tester = KnapSack(debug=True)
+    tester = KnapSack()
     tester.run()

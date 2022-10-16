@@ -7,7 +7,7 @@ from imblearn.over_sampling import RandomOverSampler
 from sklearn.preprocessing import OneHotEncoder
 
 
-# root_dir = '/root/ML/Assignment 2'
+# root_dir = '/root/ML/'
 root_dir = '/Users/wchen/PycharmProjects/ML/'
 
 

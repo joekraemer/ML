@@ -25,10 +25,10 @@ def _draw_variance_curve(ax, df, x=None, label=''):
 def plot_algo_dict_generic_with_variance(data_dict, x=None, height=3.5, width=5):
     fig, ax = plt.subplots()
 
-    rhc = pd.DataFrame(data_dict['rhc'])
-    sa = pd.DataFrame(data_dict['sa'])
-    ga = pd.DataFrame(data_dict['ga'])
-    mimic = pd.DataFrame(data_dict['mimic'])
+    rhc = pd.DataFrame(data_dict['rhc']).ffill(axis=1)
+    sa = pd.DataFrame(data_dict['sa']).ffill(axis=1)
+    ga = pd.DataFrame(data_dict['ga']).ffill(axis=1)
+    mimic = pd.DataFrame(data_dict['mimic']).ffill(axis=1)
 
     _draw_variance_curve(ax, rhc, x, label='Randomized Hill Climb')
     _draw_variance_curve(ax, sa, x, label='Simulated Annealing')
@@ -132,6 +132,7 @@ def plot_lc_fitness_vs_evals(fitness_dict, evals_dict, dataset):
 
 def plot_lc_iterations(iterations_dict, dataset):
     plt.figure()
+
     plot_algo_dict_generic_with_variance(iterations_dict)
 
     plt.xlabel('Iterations')

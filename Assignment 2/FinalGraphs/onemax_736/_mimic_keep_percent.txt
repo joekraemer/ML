@@ -1,0 +1,5 @@
+ Hyperparameter & Total Fxn Evals & Convergence Time (sec) & Time / Iterations (ms) & Fxn Evals / Iteration & Fitness Avg & Fitness Variance 
+0.05 & 20446 & 2.14 & 20.82 & 199.1 & 30.00 & 0.00 \\\
+0.1 & 20619 & 2.14 & 20.68 & 199.1 & 30.00 & 0.00 \\\
+0.2 & 20821 & 2.18 & 20.85 & 199.1 & 30.00 & 0.00 \\\
+0.3 & 20964 & 2.20 & 20.92 & 199.1 & 30.00 & 0.00 \\\

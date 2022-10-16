@@ -9,8 +9,18 @@ import math
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
     plot_hyperparam_dict_generic, plot_helper, plot_lc_fitness_vs_evals
-from util.logging_tables import log_evals_table
+from util.logging_tables import log_evals_table, save_obj_as_pickle
 from tests.hyperparameter_tester import HyperTester
+
+
+class ExperimentResult(object):
+    def __init__(self, fitness_dict, time_dict, eval_dict=None, dataset=None,
+                 experiment_name=None):
+        self.TimeDict = time_dict
+        self.FitnessDict = fitness_dict
+        self.EvalDict = eval_dict
+        self.Dataset = dataset
+        self.ExperimentName = experiment_name
 
 
 def calc_max_attempts(n, sigmas=2):
@@ -83,6 +93,8 @@ class GenericTester(object):
         total_time = time.time() - start
         print(self.Name + "Run Time:", total_time)
 
+        print("Saving Objects")
+
         return
 
     def run_experiment_complexity(self):
@@ -125,6 +137,14 @@ class GenericTester(object):
             time_dict["sa"].append(as_array[:, 1])
             time_dict["ga"].append(as_array[:, 2])
             time_dict["mimic"].append(as_array[:, 3])
+
+        full_res = ExperimentResult(fitness_dict=fitness_dict, time_dict=time_dict, dataset=self.Name,
+                                    experiment_name='complexity')
+
+        filename = self.Name + '_complexity_'
+        folder = self.Name
+
+        save_obj_as_pickle(full_res, folder, filename)
 
         # plot_evaluations_vs_complexity(fitness_dict, self.ComplexityList, self.Name)
         plot_fitness_vs_complexity(fitness_dict, self.ComplexityList, self.Name)
@@ -206,6 +226,14 @@ class GenericTester(object):
             times_dict["sa"].append(run_res[9])
             times_dict["ga"].append(run_res[10])
             times_dict["mimic"].append(run_res[11])
+
+        full_res = ExperimentResult(fitness_dict=fitness_dict, time_dict=times_dict, eval_dict=evaluations_dict, dataset=self.Name,
+                                    experiment_name='iterations')
+
+        filename = self.Name + '_iterations_'
+        folder = self.Name
+
+        save_obj_as_pickle(full_res, folder, filename)
 
         log_evals_table(evaluations_dict, times_dict, name=self.Name)
         plot_lc_iterations(fitness_dict, self.Name)

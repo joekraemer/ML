@@ -10,14 +10,14 @@ import multiprocessing
 
 from util.graphing import plot_lc_iterations, plot_fitness_vs_complexity, plot_time_vs_complexity, plot_lc_evaluations, \
     plot_hyperparam_dict_generic, plot_helper
-from util.logging_tables import save_obj_as_pickle
+from util.logging_tables import save_obj_as_pickle, log_hyper_table
 
 
 class HyperParamResult(object):
-    def __init__(self, fitness_dict, time_dict, problem_constructor, dataset, param):
+    def __init__(self, fitness_dict, evals_dict, time_dict, dataset, param):
         self.TimeDict = time_dict
         self.FitnessDict = fitness_dict
-        self.ProblemConstructor = problem_constructor
+        self.EvalsDict = evals_dict
         self.Dataset = dataset
         self.Param = param
 
@@ -29,15 +29,17 @@ class HyperTester(object):
             self.N_Jobs = num_cores
         else:
             self.N_Jobs = num_cores - 1
-        self.ProblemConstructor = problem_constructor
         self.Dataset = dataset
         self.N_Runs = n_runs
+        self.ProblemConstructor = problem_constructor
+
 
         default_hyper_params = {'num_restarts': [0, 4, 8, 12, 16],
-                      'ga_pop_size': [50, 100, 200, 350],
-                      'ga_mut_prob': [0.02, 0.05, 0.1, 0.2],
-                      'mimic_pop_size': [100, 200, 300, 400],
-                      'mimic_keep_percent': [0.05, 0.1, 0.2, 0.3]}
+                                'ga_pop_size': [50, 100, 200, 350],
+                                'ga_default_pop': 100,
+                                'ga_mut_prob': [0.02, 0.05, 0.1, 0.2],
+                                'mimic_pop_size': [100, 200, 300, 400],
+                                'mimic_keep_percent': [0.05, 0.1, 0.2, 0.3]}
 
         if config is not None:
             self.Hyper = {**default_hyper_params, **config}
@@ -50,9 +52,11 @@ class HyperTester(object):
                                  dataset):
         fitness_curve_dict = {}
         time_dict = {}
+        evals_curve_dict = {}
 
         for p in params:
             fitness_curve_dict[str(p)] = []
+            evals_curve_dict[str(p)] = []
             time_dict[str(p)] = []
 
         inputs = tqdm(params)
@@ -63,15 +67,16 @@ class HyperTester(object):
 
             for res in processed_list_all:
                 fitness_curve_dict[res[0]].append(res[1][:, 0])
+                evals_curve_dict[res[0]].append(res[1][:, 1])
                 time_dict[res[0]].append(res[2])
 
-        full_res = HyperParamResult(fitness_dict=fitness_curve_dict, time_dict=time_dict, problem_constructor=self.ProblemConstructor, dataset=dataset, param=filename_base)
+        full_res = HyperParamResult(fitness_dict=fitness_curve_dict, evals_dict=evals_curve_dict, time_dict=time_dict, dataset=dataset, param=filename_base)
 
         filename = dataset + '_hyperparam' + filename_base
         folder = dataset
 
         save_obj_as_pickle(full_res, folder, filename)
-
+        log_hyper_table(evals_dict=evals_curve_dict, fitness_dict=fitness_curve_dict, times_dict=time_dict, folder=folder, name=filename_base)
         # plotting
         plot_hyperparam_dict_generic(fitness_curve_dict, label=legend_base_label)
         plot_helper('', filename, folder)
@@ -147,7 +152,8 @@ class HyperTester(object):
         problem, init_state = self.ProblemConstructor()
         start = time.time()
 
-        _, _, fitness_curve = mlrose_hiive.genetic_alg(problem, mutation_prob=mut, pop_size=100,
+        _, _, fitness_curve = mlrose_hiive.genetic_alg(problem, mutation_prob=mut,
+                                                       pop_size=self.Hyper['ga_default_pop'],
                                                        max_attempts=1000,
                                                        max_iters=10000, curve=True)
         end = time.time() - start
