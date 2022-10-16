@@ -14,7 +14,7 @@ class KnapSack(GenericTester):
     def problem_constructor(self, complexity=200, seed=123456):
         problem = KnapsackGenerator().generate(number_of_items_types=complexity,
                                                max_item_count=100, max_weight_per_item=40,
-                                               max_value_per_item=20, max_weight_pct=0.6)
+                                               max_value_per_item=20, max_weight_pct=0.6, seed=seed)
         problem.set_mimic_fast_mode(True)
         init_state = np.random.randint(2, size=complexity)
         return problem, init_state
