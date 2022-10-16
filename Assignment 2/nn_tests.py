@@ -25,9 +25,9 @@ class NNAlgo(object):
             default_params = {}
 
         if debug:
-            self.NNStructure = [40, 40]
+            self.NNStructure = [40]
         else:
-            self.NNStructure = [50, 50, 50]
+            self.NNStructure = [50, 50]
 
         self.FullAlgo = full_algo
         self.LearningRate = learning_rate
@@ -85,18 +85,16 @@ class NNAlgo(object):
 
 
 class NNTester(object):
-    def __init__(self, n_jobs=7, n_runs=3, debug=True):
+    def __init__(self, n_jobs=1, debug=False):
         self.Debug = debug
         self.N_Jobs = n_jobs
         self.Builder = NNBuilder(self.Debug)
         self.BackpropAlgos = []
-        self.N_Runs = n_runs
 
         if self.Debug:
-            self.N_Runs = 1
-            n_splits = 1
+            n_splits = 5
         else:
-            n_splits = 3
+            n_splits = 5
 
         self.SSS = StratifiedShuffleSplit(n_splits=n_splits, test_size=0.3, random_state=0)
 
@@ -182,17 +180,15 @@ class NNTester(object):
             temp_learner,
             ds.train_x,
             ds.train_y,
-            scoring="f1_weighted",
+            scoring="accuracy",
             cv=self.SSS,
             n_jobs=self.N_Jobs,
             train_sizes=train_sizes,
             return_times=True,
         )
 
-        fit_times_ms = fit_times * 1000
-
         plot_learning_curve(train_scores, test_scores, train_sizes, algo.ShortName, folder='nn_' + ds.name)
-        plot_scalability(fit_times_ms, train_sizes, algo.ShortName, folder='nn_' + ds.name)
+        plot_scalability(fit_times, train_sizes, algo.ShortName, folder='nn_' + ds.name)
         return
 
 
@@ -234,7 +230,7 @@ class NNBuilder(object):
         default_params = {
             'seed': 123456,
             'max_attempts': 500,
-            'restarts': 10,
+            'restarts': [10],
             'cv': 5,
         }
 
@@ -363,12 +359,12 @@ if __name__ == "__main__":
 
     print("Starting Tests....")
 
-    tester = NNTester(n_jobs=7, debug=False)
+    tester = NNTester(n_jobs=7, debug=True)
     tester.run(ds_red_wine)
 
     # Run GS on NN algos to try to get somekind of results
-    rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=False)
-    rw_grid_search.run_all_grid_searches()
+    # rw_grid_search = NNGridSearchExecutor(ds_red_wine, debug=False)
+    # rw_grid_search.run_all_grid_searches()
 
 
 

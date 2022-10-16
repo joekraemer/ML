@@ -12,10 +12,22 @@ N_JOBS = 7
 
 
 class HyperTester(object):
-    def __init__(self, problem_constructor, dataset, n_runs=7):
+    def __init__(self, problem_constructor, dataset, n_runs=7, config=None):
         self.ProblemConstructor = problem_constructor
         self.Dataset = dataset
         self.N_Runs = n_runs
+
+        default_hyper_params = {'num_restarts': [0, 4, 8, 12, 16],
+                      'ga_pop_size': [50, 100, 200, 350],
+                      'ga_mut_prob': [0.02, 0.05, 0.1, 0.2],
+                      'mimic_pop_size': [100, 200, 300, 400],
+                      'mimic_keep_percent': [0.05, 0.1, 0.2, 0.3]}
+
+        if config is not None:
+            self.Hyper = {**default_hyper_params, **config}
+        else:
+            self.Hyper = default_hyper_params
+
         return
 
     def generic_hyperparam_multi(self, function, params, legend_base_label, filename_base,
@@ -39,10 +51,7 @@ class HyperTester(object):
         plot_helper('', dataset + '_hyperparam' + filename_base, dataset)
 
     def hyperparam_rhc(self):
-        problem, init_state = self.ProblemConstructor()
-
-        num_restarts = [0, 4, 8, 12, 16]
-        self.generic_hyperparam_multi(function=self.run_single_hyper_rhc, params=num_restarts,
+        self.generic_hyperparam_multi(function=self.run_single_hyper_rhc, params=self.Hyper['num_restarts'],
                                       legend_base_label='# restarts = ', filename_base='_rhc_restarts',
                                       dataset=self.Dataset)
 
@@ -85,14 +94,12 @@ class HyperTester(object):
         return
 
     def hyperparam_ga(self):
-        pop_size = [50, 100, 200, 350]
-        self.generic_hyperparam_multi(function=self.run_single_hyper_ga_pop, params=pop_size,
+        self.generic_hyperparam_multi(function=self.run_single_hyper_ga_pop, params=self.Hyper['ga_pop_size'],
                                       legend_base_label='Population = ',
                                       filename_base='_ga_pop_size', dataset=self.Dataset)
         print("Completed GA population size hyper-parameter")
 
-        mutation_prob = [0.02, 0.05, 0.1, 0.2]
-        self.generic_hyperparam_multi(function=self.run_single_hyper_ga_mut, params=mutation_prob,
+        self.generic_hyperparam_multi(function=self.run_single_hyper_ga_mut, params=self.Hyper['ga_mut_prob'],
                                       legend_base_label='Mutation Prob = ',
                                       filename_base='_ga_mutation_prob', dataset=self.Dataset)
         print("Completed GA mutation prob testing")
@@ -115,15 +122,13 @@ class HyperTester(object):
         return str(mut), fitness_curve
 
     def hyperparam_mimic(self):
-        pop_size = [100, 200, 300, 400]
-        self.generic_hyperparam_multi(function=self.run_single_hyper_mimic_pop, params=pop_size,
+        self.generic_hyperparam_multi(function=self.run_single_hyper_mimic_pop, params=self.Hyper['mimic_pop_size'],
                                       legend_base_label='Population = ',
                                       filename_base='_mimic_pop_size', dataset=self.Dataset)
         print("Completed MIMIC population size hyper-parameter")
 
-        keep_percent = [0.05, 0.1, 0.2, 0.3]
         self.generic_hyperparam_multi(function=self.run_single_hyper_mimic_keep,
-                                      params=keep_percent,
+                                      params=self.Hyper['mimic_keep_percent'],
                                       legend_base_label='Keep % = ',
                                       filename_base='_mimic_keep_percent', dataset=self.Dataset)
         print("Completed MIMIC keep % testing")

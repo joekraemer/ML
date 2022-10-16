@@ -21,7 +21,7 @@ class Dataset(object):
         pass
 
 
-def load_lung_cancer(split=0.75):
+def load_lung_cancer(split=0.75, balance=False):
     data_df = pd.read_csv(root_dir + 'Assignment1/Code/Datasets/survey lung cancer.csv')
     data = data_df.to_numpy()
 
@@ -34,12 +34,17 @@ def load_lung_cancer(split=0.75):
     X = data[:, 0:-1]
     y = data[:, -1].astype('int')
 
-    # TODO: This data set is unbalanced
-    ros = RandomOverSampler(random_state=0)
-    X_resampled, y_resampled = ros.fit_resample(X, y)
+    if balance:
+        # TODO: This data set is unbalanced
+        ros = RandomOverSampler(random_state=0)
+        X_resampled, y_resampled = ros.fit_resample(X, y)
 
-    X_balanced = X_resampled
-    y_balanced = y_resampled
+        X_balanced = X_resampled
+        y_balanced = y_resampled
+
+    else:
+        X_balanced = X
+        y_balanced = y
 
     # TODO: Not sure if this is how I should split the data, people were talking about balancing or something
     X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, random_state=42)

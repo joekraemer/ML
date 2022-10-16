@@ -19,22 +19,24 @@ def log_evals_table(evals_dict, times_dict, name):
             ...
         }
     """
+    temp_evals_dict = {}
+    temp_times_dict = {}
 
-    evals_dict['rhc'] = pd.DataFrame(evals_dict['rhc'])
-    evals_dict['sa'] = pd.DataFrame(evals_dict['sa'])
-    evals_dict['ga'] = pd.DataFrame(evals_dict['ga'])
-    evals_dict['mimic'] = pd.DataFrame(evals_dict['mimic'])
+    temp_evals_dict['rhc'] = pd.DataFrame(evals_dict['rhc'])
+    temp_evals_dict['sa'] = pd.DataFrame(evals_dict['sa'])
+    temp_evals_dict['ga'] = pd.DataFrame(evals_dict['ga'])
+    temp_evals_dict['mimic'] = pd.DataFrame(evals_dict['mimic'])
 
-    times_dict['rhc'] = pd.DataFrame(times_dict['rhc']).mean()
-    times_dict['sa'] = pd.DataFrame(times_dict['sa']).mean()
-    times_dict['ga'] = pd.DataFrame(times_dict['ga']).mean()
-    times_dict['mimic'] = pd.DataFrame(times_dict['mimic']).mean()
+    temp_times_dict['rhc'] = pd.DataFrame(times_dict['rhc']).mean()
+    temp_times_dict['sa'] = pd.DataFrame(times_dict['sa']).mean()
+    temp_times_dict['ga'] = pd.DataFrame(times_dict['ga']).mean()
+    temp_times_dict['mimic'] = pd.DataFrame(times_dict['mimic']).mean()
 
-    lines = ["rhc & total evaluations & wall clock time (sec) & time/eval (ms) & time/iteration (ms)"]
+    lines = ["rhc & total evaluations & wall clock time (sec) & time/eval (ms) & time/iteration (ms) & evals/iteration"]
 
-    for key, avg_time in times_dict.items():
+    for key, avg_time in temp_times_dict.items():
         # since I don't trust evals to restart, I have to compute my own for each row of the df
-        diffed = evals_dict[key].diff(axis=1)
+        diffed = temp_evals_dict[key].diff(axis=1)
         cummed_axis_1_T = diffed.cumsum(axis=1).transpose()
 
         # Need to grab the last number in each series
@@ -43,16 +45,19 @@ def log_evals_table(evals_dict, times_dict, name):
         avg_total_evals = float(ffilled.tail(1).mean(axis=1))
 
         # number of iterations
-        total_iterations = evals_dict[key].count().sum()
-        avg_total_iterations = total_iterations/evals_dict[key].shape[0]
+        total_iterations = temp_evals_dict[key].count().sum()
+        avg_total_iterations = total_iterations / temp_evals_dict[key].shape[0]
 
-        time_per_eval = (float(avg_time)/avg_total_evals) * 1000
-        time_per_iteration = (float(avg_time)/avg_total_iterations) * 1000
+        time_per_eval = (float(avg_time) / avg_total_evals) * 1000
+        time_per_iteration = (float(avg_time) / avg_total_iterations) * 1000
+
+        avg_evals_per_iteration = avg_total_iterations / avg_total_evals
 
         line = key + " & " + str(int(avg_total_evals)) + " & " + f'{float(avg_time):.2f}' + \
-               " & " +  f'{time_per_eval:.2f}' +  " & " + f'{time_per_iteration:.2f}' + " \\" + "\\"
+               " & " + f'{time_per_eval:.2f}' + " & " + f'{time_per_iteration:.2f}' + " & " \
+               + f'{float(avg_evals_per_iteration):.1f}' + " \\" + "\\"
 
-        lines.append(line)
+        lines.append(line + "\\")
     # what I want is a table
     # rhc & total evaluations & wall clock time & time/eval ms & time/iteration ms
 
@@ -61,8 +66,9 @@ def log_evals_table(evals_dict, times_dict, name):
 
 
 def logging_scoring_metrics(lines, folder, name):
-    save_table_to_file(lines, folder=folder, filename= name + '_gs_scoring_metrics_')
+    save_table_to_file(lines, folder=folder, filename=name + '_gs_scoring_metrics_')
     return
+
 
 def save_table_to_file(lines, folder, filename):
     root_dir = Path(".")
@@ -74,5 +80,3 @@ def save_table_to_file(lines, folder, filename):
             f.write('\n')
 
     return
-
-

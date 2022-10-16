@@ -84,7 +84,7 @@ def plot_loss_curves(loss_dict, dataset, height=3.5, width=5):
     _draw_variance_curve(ax, rhc, label='Randomized Hill Climb')
     _draw_variance_curve(ax, sa, label='Simulated Annealing')
     _draw_variance_curve(ax, ga, label='Genetic Algorithm')
-    _draw_variance_curve(ax, gd, label='gd')
+    _draw_variance_curve(ax, gd, label='Gradient Descent')
 
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
@@ -109,8 +109,11 @@ def plot_lc_fitness_vs_evals(fitness_dict, evals_dict, dataset):
 
     rhc = fitness_dict['rhc'][0]
     rhc_x = evals_dict['rhc'][0]
+    rhc_x = rhc_x - rhc_x[0]
     sa = fitness_dict['sa'][0]
     sa_x = evals_dict['sa'][0]
+    sa_x = sa_x - sa_x[0]
+
     ga = fitness_dict['ga'][0]
     ga_x = evals_dict['ga'][0]
     mimic = fitness_dict['mimic'][0]
@@ -230,7 +233,7 @@ def plot_scalability(fit_times, train_sizes, name, folder):
     )
 
     ax.set_xlabel("Training examples")
-    ax.set_ylabel("Time to Fit Model (ms)")
+    ax.set_ylabel("Time to Fit Model (s)")
 
     plot_helper('', 'scalability_' + name, folder=folder, show=False)
     return
