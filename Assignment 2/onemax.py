@@ -20,7 +20,7 @@ class OneMax(GenericTester):
             print("Debug mode")
             self.Complexity = 30
         else:
-            self.Complexity = 180
+            self.Complexity = 50
         return
 
     def problem_constructor(self, complexity=None, seed=123456):
@@ -33,12 +33,14 @@ class OneMax(GenericTester):
         return problem, init_state
 
     def run_best_rhc(self, problem, init_state, curve=True):
-        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=2000, restarts=10,
+        max_attempts = self.calc_max_attempts(problem.length)
+        return mlrose_hiive.random_hill_climb(problem, max_attempts=max_attempts, max_iters=2000, restarts=10,
                                                                 init_state=init_state, curve=curve)
 
     def run_best_sa(self, problem, init_state, curve=True):
+        max_attempts = self.calc_max_attempts(problem.length)
         return mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.ExpDecay(),
-                                         max_attempts=1000, max_iters=2000,
+                                         max_attempts=max_attempts, max_iters=2000,
                                          init_state=init_state, curve=curve)
 
     def run_best_ga(self, problem, init_state, curve=True):
@@ -54,7 +56,7 @@ class OneMax(GenericTester):
 
 
 if __name__ == "__main__":
-    tester = OneMax(debug=False)
+    tester = OneMax(debug=True)
     tester.run()
 
 

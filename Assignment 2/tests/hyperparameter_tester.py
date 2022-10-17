@@ -38,7 +38,9 @@ class HyperTester(object):
                                 'ga_pop_size': [50, 100, 200, 350],
                                 'ga_default_pop': 100,
                                 'ga_mut_prob': [0.02, 0.05, 0.1, 0.2],
+                                'mimic_default_keep': 0.2,
                                 'mimic_pop_size': [100, 200, 300, 400],
+                                'mimic_default_pop': 300,
                                 'mimic_keep_percent': [0.05, 0.1, 0.2, 0.3]}
 
         if config is not None:
@@ -175,7 +177,7 @@ class HyperTester(object):
         problem, init_state = self.ProblemConstructor()
         start = time.time()
 
-        _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=0.1, pop_size=pop, max_attempts=100,
+        _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=self.Hyper['mimic_default_keep'], pop_size=pop, max_attempts=1000,
                                                  max_iters=10000, curve=True)
         end = time.time() - start
         return str(pop), fitness_curve, end
@@ -183,14 +185,14 @@ class HyperTester(object):
     def run_single_hyper_mimic_keep(self, keep):
         problem, init_state = self.ProblemConstructor()
         start = time.time()
-        _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=keep, pop_size=200, max_attempts=100,
+        _, _, fitness_curve = mlrose_hiive.mimic(problem, keep_pct=keep, pop_size=self.Hyper['mimic_default_pop'], max_attempts=1000,
                                                  max_iters=10000, curve=True)
         end = time.time() - start
         return str(keep), fitness_curve, end
 
     def run_hyperparameters(self):
-        self.hyperparam_rhc()
+        # self.hyperparam_rhc()
         self.hyperparam_sa()
-        self.hyperparam_ga()
-        self.hyperparam_mimic()
+        # self.hyperparam_ga()
+        # self.hyperparam_mimic()
         return

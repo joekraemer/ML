@@ -6,8 +6,8 @@ from GenericTester import GenericTester
 
 class FourPeaks(GenericTester):
     def __init__(self, debug=False):
-        hyper_tuning = {'ga_pop_size': [50, 200, 300, 400],
-                                 'mimic_pop_size': [50, 200, 300, 400]}
+        hyper_tuning = {'ga_pop_size': [100, 300, 400],
+                                 'mimic_pop_size': [200, 500, 700]}
         super().__init__(name='four_peaks', complexity_list=range(30, 100, 20), debug=debug,
                          hyper_config=hyper_tuning)
 
@@ -19,19 +19,23 @@ class FourPeaks(GenericTester):
         return problem, init_state
 
     def run_best_rhc(self, problem, init_state, curve=True):
-        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=20000, restarts=10,
+        max_attempts = self.calc_max_attempts(problem.length)
+        return mlrose_hiive.random_hill_climb(problem, max_attempts=max_attempts, max_iters=20000, restarts=10,
                                                                 init_state=init_state, curve=curve)
 
     def run_best_sa(self, problem, init_state, curve=True):
+        max_attempts = self.calc_max_attempts(problem.length)
         return mlrose_hiive.simulated_annealing(problem, schedule=mlrose_hiive.GeomDecay(),
-                                         max_attempts=500, max_iters=20000,
+                                         max_attempts=max_attempts, max_iters=20000,
                                          init_state=init_state, curve=curve)
 
     def run_best_ga(self, problem, init_state, curve=True):
-        return mlrose_hiive.genetic_alg(problem, pop_size=300, mutation_prob=0.2, max_attempts=500, max_iters=20000, curve=curve)
+        max_attempts = self.calc_max_attempts(problem.length)
+        return mlrose_hiive.genetic_alg(problem, pop_size=300, mutation_prob=0.2, max_attempts=max_attempts, max_iters=20000, curve=curve)
 
     def run_best_mimic(self, problem, init_state, curve=True):
-        return mlrose_hiive.mimic(problem, pop_size=300, keep_pct=0.2, max_attempts=500, max_iters=20000,
+        max_attempts = self.calc_max_attempts(problem.length)
+        return mlrose_hiive.mimic(problem, pop_size=500, keep_pct=0.1, max_attempts=max_attempts, max_iters=20000,
                            curve=curve)
 
     def run_extra(self):
@@ -42,6 +46,8 @@ class FourPeaks(GenericTester):
 
 if __name__ == "__main__":
     tester = FourPeaks()
-    tester.run()
+    tester.run_hyperparameters()
+    #tester.run_experiment_iterations()
+    #tester.run()
 
 

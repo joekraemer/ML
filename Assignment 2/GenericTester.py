@@ -23,15 +23,29 @@ class ExperimentResult(object):
         self.ExperimentName = experiment_name
 
 
-def calc_max_attempts(n, sigmas=2):
-    expectation = n * (math.log(math.e) * n + 0.577216) + 0.5
-
-    sigma = math.sqrt()
-    sigma = (math.pi ** 2) / 6 * (n ** 2)
 
 
-def calc_sigma(p):
-    return math.sqrt((1 - p) / (p ** 2))
+
+def calc_expectation(n):
+    sum = 0.0
+    for n in range(1, n+1):
+        sum += 1/n
+    expectation = n * sum
+    return expectation
+
+
+def calc_geo_var(p):
+    return (1 - p) / (p ** 2)
+
+
+def calc_sigma(n):
+    var = 0.0
+    for i in range(1, n):
+        p = i/n
+        var += calc_geo_var(p)
+
+    sigma = math.sqrt(var)
+    return sigma
 
 
 class GenericTester(object):
@@ -60,11 +74,15 @@ class GenericTester(object):
         init_state = None
         return problem, init_state
 
+    def calc_max_attempts(self, d, sigmas=2):
+        n = 2 * d
+        expect = calc_expectation(n)
+        variance = calc_sigma(n)
+        max_attempts = expect + sigmas * variance
+        return int(max_attempts)
+
     def run_best_rhc(self, problem, init_state, curve=True):
-
-        # max_attempts = calc_max_attempts(problem.complexity)
-
-        return mlrose_hiive.random_hill_climb(problem, max_attempts=1000, max_iters=20000, restarts=10,
+        return mlrose_hiive.random_hill_climb(problem, max_attempts=max_attempts, max_iters=20000, restarts=10,
                                               init_state=init_state, curve=curve)
 
     def run_best_sa(self, problem, init_state, curve=True):

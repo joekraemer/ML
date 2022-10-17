@@ -68,6 +68,7 @@ class NNAlgo(object):
         cx_skr = NNGSRunner(x_train=ds.train_x, y_train=ds.train_y,
                             x_test=ds.test_x, y_test=ds.test_y,
                             algorithm=self.FullAlgo,
+                            output_directory='nngs_' + self.BackpropAlgo,
                             experiment_name=experiment_name,
                             grid_search_parameters=self.GridSearchParams,
                             **self.Params)
