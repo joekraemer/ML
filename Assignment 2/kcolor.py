@@ -55,9 +55,9 @@ class KColor(GenericTester):
 
         super().__init__(name='kcolors', complexity_list=range(10, 50, 20), hyper_config=hyper_tuning, debug=debug)
 
-    def problem_constructor(self, complexity=20, seed=123456):
-        max_connections = 4 # typically 1/5
-        problem = MaxKColorGenerator().generate(seed=123456, number_of_nodes=complexity, max_connections_per_node=max_connections, maximize=True)
+    def problem_constructor(self, complexity=40, seed=123456):
+        max_connections = complexity # typically 1/5
+        problem = MaxKColorGenerator().generate(seed=12345, number_of_nodes=complexity, max_connections_per_node=max_connections, maximize=True)
         problem.set_mimic_fast_mode(True)
         init_state = np.random.randint(2, size=complexity)
         return problem, init_state
@@ -75,11 +75,11 @@ class KColor(GenericTester):
 
     def run_best_ga(self, problem, init_state, curve=True):
         max_attempts = self.calc_max_attempts(problem.length)
-        return mlrose_hiive.genetic_alg(problem, max_attempts=max_attempts, max_iters=10000, curve=curve)
+        return mlrose_hiive.genetic_alg(problem, max_attempts=max_attempts, pop_size=50, mutation_prob=0.4, max_iters=10000, curve=curve)
 
     def run_best_mimic(self, problem, init_state, curve=True):
         max_attempts = self.calc_max_attempts(problem.length)
-        return mlrose_hiive.mimic(problem, keep_pct=0.5, pop_size=200, max_attempts=max_attempts, max_iters=10000,
+        return mlrose_hiive.mimic(problem, keep_pct=0.3, pop_size=1000, max_attempts=max_attempts, max_iters=10000,
                                   curve=curve)
 
     def run_extra(self):

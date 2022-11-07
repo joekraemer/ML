@@ -1,0 +1,44 @@
+diabetic:
+  benchmark:
+    dims: 8
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (20, 20, 20, 20), 'NN__learning_rate_init': 0.001}
+    # NN Params New {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (30,), 'NN__learning_rate_init': 0.001}
+    arch: [ 30 ]
+    lr: 0.001
+    alpha: 0.0001
+  ica:
+    dims: 15
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (25,), 'NN__learning_rate_init': 0.01}
+    arch: [ 25 ]
+    lr: 0.01
+    alpha: 0.0001
+  pca:
+    dims: 14
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (5, 5), 'NN__learning_rate_init': 0.001}
+    arch: [ 5, 5 ]
+    lr: 0.001
+    alpha: 0.0001
+  rp:
+    dims: 5 # could also go with 8
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (5, 5), 'NN__learning_rate_init': 0.001}
+    arch: [ 5, 5 ]
+    lr: 0.001
+    alpha: 0.0001
+  fi:
+    features_to_keep: [ 1,16,15,9,6,11,17,14,8,2 ]
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (5, 5), 'NN__learning_rate_init': 0.001}
+    arch: [ 5, 5 ]
+    lr: 0.001
+    alpha: 0.0001
+  gmm:
+    clusters: 11
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (60, 60, 60), 'NN__learning_rate_init': 0.01}
+    arch: [ 60, 60, 60 ]
+    lr: 0.01
+    alpha: 0.0001
+  kmeans:
+    clusters: 7
+    # NN Params {'NN__alpha': 0.0001, 'NN__hidden_layer_sizes': (60, 60), 'NN__learning_rate_init': 0.01}
+    arch: [ 60, 60 ]
+    lr: 0.01
+    alpha: 0.001

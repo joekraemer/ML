@@ -1,7 +1,7 @@
-from pathlib import Path
-import pandas as pd
-import numpy as np
 import pickle
+from pathlib import Path
+
+import pandas as pd
 
 lines = ['Readme', 'How to write text files in Python']
 
@@ -39,7 +39,8 @@ def log_hyper_table(evals_dict, fitness_dict, times_dict, folder, name):
     for key, item in fitness_dict.items():
         temp_fitness_dict[key] = pd.DataFrame(item)
 
-    lines = [" Hyperparameter & Total Fxn Evals & Run Time (sec) & Time / Iterations (ms) & Fxn Evals / Iteration & Avg Fitness & Fitness Std  \\"]
+    lines = [
+        " Hyperparameter & Total Fxn Evals & Run Time (sec) & Time / Iterations (ms) & Fxn Evals / Iteration & Avg Fitness & Fitness Std  \\"]
 
     for key, avg_time in temp_times_dict.items():
         # since I don't trust evals to restart, I have to compute my own for each row of the df
@@ -66,7 +67,7 @@ def log_hyper_table(evals_dict, fitness_dict, times_dict, folder, name):
 
         line = key + " & " + str(int(avg_total_evals)) + " & " + f'{float(avg_time):.2f}' + \
                " & " + f'{time_per_iteration:.2f}' + " & " \
-               + f'{avg_evals_per_iteration:.1f}' +  " & " + f'{avg_fitness:.2f}' + " & " + f'{std_fitness:.2f}' + " \\" + "\\"
+               + f'{avg_evals_per_iteration:.1f}' + " & " + f'{avg_fitness:.2f}' + " & " + f'{std_fitness:.2f}' + " \\" + "\\"
 
         lines.append(line + "\\")
     # what I want is a table
@@ -144,7 +145,6 @@ def save_table_to_file(lines, folder, filename):
         for line in lines:
             f.write(line)
             f.write('\n')
-
     return
 
 

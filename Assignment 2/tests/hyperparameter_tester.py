@@ -191,8 +191,8 @@ class HyperTester(object):
         return str(keep), fitness_curve, end
 
     def run_hyperparameters(self):
-        # self.hyperparam_rhc()
+        self.hyperparam_rhc()
         self.hyperparam_sa()
-        # self.hyperparam_ga()
-        # self.hyperparam_mimic()
+        self.hyperparam_ga()
+        self.hyperparam_mimic()
         return

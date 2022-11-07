@@ -1,9 +1,7 @@
 import time
-from queens import Queens
 from fourpeaks import FourPeaks
-from knapsack import KnapSack
-from flipflop import FlipFlop
 from kcolor import KColor
+from onemax import OneMax
 from nn_tests import NNTester, NNGridSearchExecutor
 from util import loading_data
 
@@ -21,12 +19,6 @@ def run():
     rw_grid_search = NNGridSearchExecutor(ds_red_wine)
     rw_grid_search.run_all_grid_searches()
 
-    tester = Queens()
-    tester.run()
-
-    tester = KnapSack()
-    tester.run()
-
     tester = NNTester()
     tester.run()
 
@@ -34,10 +26,6 @@ def run():
     tester.run()
 
     tester = KColor()
-    tester.run()
-
-    # LOCKED IN USE
-    tester = FlipFlop()
     tester.run()
 
     total_time = time.time() - start

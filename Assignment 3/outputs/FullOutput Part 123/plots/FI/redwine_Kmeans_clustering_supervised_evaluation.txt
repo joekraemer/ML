@@ -1,0 +1,2 @@
+Algorithm & Accuracy & AMI & Rand Index & Homogeneity & Completeness \\
+kmeans & 0.542 & 0.111 & 0.621 & 0.158 \\

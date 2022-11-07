@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 
 
 def plot_correlation_matrix(df, name, hue=None, folder='Data'):
@@ -14,7 +14,7 @@ def plot_correlation_matrix(df, name, hue=None, folder='Data'):
 
 
 def bar_chart(labels, data_1, yaxis_label, d1_std=None,
-                      title='', file_name='', folder=None):
+              title='', file_name='', folder=None):
     # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
 
     x = np.arange(len(labels)).astype(float)  # the label locations
@@ -45,8 +45,8 @@ def grouped_bar_chart(labels, data_1, data_2, label_1, label_2, yaxis_label, d1_
     fig, ax = plt.subplots()
     fig.set_figheight(5)
     fig.set_figwidth(6)
-    rects1 = ax.bar(x - width/2, data_1, width, yerr=d1_std, label=label_1, color='r')
-    rects2 = ax.bar(x + width/2, data_2, width, yerr=d2_std, label=label_2, color='g')
+    rects1 = ax.bar(x - width / 2, data_1, width, yerr=d1_std, label=label_1, color='r')
+    rects2 = ax.bar(x + width / 2, data_2, width, yerr=d2_std, label=label_2, color='g')
 
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
@@ -101,7 +101,8 @@ def plot_learning_curve(train_scores, test_scores, train_sizes, name, folder, he
     return
 
 
-def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, folder, x_tick_labels=None, enable_dots=True, height=3, width=5):
+def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, folder, x_tick_labels=None,
+                                     enable_dots=True, height=3, width=5):
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -151,7 +152,7 @@ def plot_hyperparam_validation_curve(train_scores, test_scores, x, name, label, 
     ax.set_xlabel(label)
     ax.set_ylabel("Score")
 
-    plot_helper('', 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
+    plot_helper('', 'hyper_tune_' + name + '_' + label, folder=folder, show=False)
     plt.clf()
     return
 
@@ -221,8 +222,8 @@ def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, na
     test_scores_mean = np.mean(test_scores, axis=1)
     test_scores_std = np.std(test_scores, axis=1)
 
-    rects1 = ax.bar(x - width/2, train_scores_mean, width, label='Training score', color="r")
-    rects2 = ax.bar(x + width/2, test_scores_mean, width, label='Cross-validation score', color="g")
+    rects1 = ax.bar(x - width / 2, train_scores_mean, width, label='Training score', color="r")
+    rects2 = ax.bar(x + width / 2, test_scores_mean, width, label='Cross-validation score', color="g")
 
     ax.legend(loc="best")
 
@@ -232,7 +233,7 @@ def plot_hyperparam_validation_bar_chart(train_scores, test_scores, x_labels, na
     ax.set_xlabel(label)
     ax.set_ylabel("Score")
 
-    plot_helper('', 'hyper_tune_' + name + '_'+ label, folder=folder, show=False)
+    plot_helper('', 'hyper_tune_' + name + '_' + label, folder=folder, show=False)
 
     return
 

@@ -1,0 +1,20 @@
+defaults:
+  - config
+
+dataset1: False
+dataset2: False
+
+benchmark: False
+clustering: False
+ica: False
+pca: False
+rp: False
+kmeans: False
+gmm: False
+
+run_basic: False
+run_nn: False
+run_additional_clustering: False
+
+plot_old_results: True
+old_results_path: /Users/wchen/PycharmProjects/ML/Assignment 3/outputs/2022-11-03/19-00-19

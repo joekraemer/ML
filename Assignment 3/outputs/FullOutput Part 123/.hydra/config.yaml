@@ -1,0 +1,215 @@
+gs_params:
+  layers:
+  - 1
+  nodes:
+  - 20
+  lr:
+  - 0.001
+  alpha:
+  - 0.001
+cluster_analysis:
+  clusters:
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 18
+  - 20
+  - 22
+  - 24
+  - 26
+  - 28
+  - 30
+  - 32
+  - 34
+  - 36
+  - 40
+  - 45
+  - 50
+  - 55
+  - 60
+dr_analysis:
+  dims:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+redwine:
+  benchmark:
+    dims: 8
+    arch:
+    - 50
+    - 50
+    - 50
+    lr: 0.01
+    alpha: 0.01
+  ica:
+    dims: 8
+    arch:
+    - 40
+    - 40
+    - 40
+    lr: 0.01
+    alpha: 0.0001
+  pca:
+    dims: 9
+    arch:
+    - 40
+    - 40
+    lr: 0.01
+    alpha: 0.0001
+  rp:
+    dims: 9
+    arch:
+    - 30
+    - 30
+    - 30
+    lr: 0.01
+    alpha: 0.0001
+  fi:
+    features_to_keep:
+    - 4
+    - 7
+    - 2
+    - 6
+    - 1
+    - 9
+    - 10
+    arch:
+    - 30
+    - 30
+    - 30
+    lr: 0.01
+    alpha: 0.0001
+  gmm:
+    clusters: 7
+    arch:
+    - 50
+    - 50
+    - 50
+    lr: 0.0001
+    alpha: 0.001
+  kmeans:
+    clusters: 8
+    arch:
+    - 50
+    - 50
+    - 50
+    lr: 0.0001
+    alpha: 0.001
+diabetic:
+  benchmark:
+    dims: 8
+    arch:
+    - 30
+    lr: 0.001
+    alpha: 0.0001
+  ica:
+    dims: 15
+    arch:
+    - 25
+    lr: 0.01
+    alpha: 0.0001
+  pca:
+    dims: 14
+    arch:
+    - 5
+    - 5
+    lr: 0.001
+    alpha: 0.0001
+  rp:
+    dims: 5
+    arch:
+    - 5
+    - 5
+    lr: 0.001
+    alpha: 0.0001
+  fi:
+    features_to_keep:
+    - 1
+    - 16
+    - 15
+    - 9
+    - 6
+    - 11
+    - 17
+    - 14
+    - 8
+    - 2
+    arch:
+    - 5
+    - 5
+    lr: 0.001
+    alpha: 0.0001
+  gmm:
+    clusters: 11
+    arch:
+    - 60
+    - 60
+    - 60
+    lr: 0.01
+    alpha: 0.0001
+  kmeans:
+    clusters: 7
+    arch:
+    - 60
+    - 60
+    lr: 0.01
+    alpha: 0.001
+paths:
+  root: ${hydra:runtime.cwd}
+  wine: ${hydra:runtime.cwd}/data/winequality-red.csv
+  diabetic: ${hydra:runtime.cwd}/data/messidor_features.arff
+  results_data: /output
+  plots: ./plots
+verbose: true
+threads: 4
+seed: 658028
+aws: false
+nn_early_stopping: true
+learning_curves_n_training_sizes: 2
+loss_curves_n_curves: 2
+cv_splits: 5
+dataset1: true
+dataset2: true
+benchmark: true
+clustering: true
+ica: true
+pca: true
+rp: true
+fi: true
+kmeans: true
+gmm: true
+run_basic: true
+run_nn: false
+run_additional_clustering: true
+plot: true
+plot_old_results: false
+old_results_path: null

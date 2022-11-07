@@ -1,5 +1,0 @@
- Hyperparameter & Total Fxn Evals & Run Time (sec) & Time / Iterations (ms) & Fxn Evals / Iteration & Avg Fitness & Fitness Std  \
-0.02 & 60567 & 5.15 & 0.94 & 11.0 & 178.71 & 1.38 \\\
-0.05 & 38501 & 3.22 & 0.92 & 11.0 & 180.00 & 0.00 \\\
-0.1 & 26254 & 2.23 & 0.94 & 11.0 & 180.00 & 0.00 \\\
-0.2 & 20088 & 1.79 & 0.98 & 11.0 & 180.00 & 0.00 \\\

@@ -1,0 +1,32 @@
+defaults:
+  - config
+  - override cluster_analysis: full
+  - override dr_analysis: full
+  - override gs_params: full
+
+verbose: True
+threads: 32
+aws: True
+nn_early_stopping: False
+learning_curves_n_training_sizes: 15
+loss_curves_n_curves: 10
+cv_splits: 15
+
+dataset1: False
+dataset2: True
+
+benchmark: True
+clustering: False
+ica: True
+pca: True
+rp: True
+
+kmeans: True
+gmm: True
+
+run_basic: True
+run_nn: True
+run_additional_clustering: False
+
+plot: True
+plot_old_results: False

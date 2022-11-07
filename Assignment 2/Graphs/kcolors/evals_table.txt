@@ -1,5 +1,0 @@
- Algorithm & Total Fxn Evals & Convergence Time (sec) & Time / Iterations (ms) & Fxn Evals/Iteration \
-rhc & 2251 & 1.50 & 0.67 & 1.0 \\\
-sa & 2711 & 0.23 & 0.09 & 1.1 \\\
-ga & 130271 & 14.96 & 23.05 & 200.7 \\\
-mimic & 104326 & 67.83 & 130.45 & 200.6 \\\

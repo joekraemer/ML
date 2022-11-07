@@ -1,0 +1,27 @@
+defaults:
+  - config
+  - override cluster_analysis: full
+  - override dr_analysis: full
+
+verbose: True
+threads: 4
+aws: False
+cv_splits: 5
+
+dataset1: True
+dataset2: True
+
+benchmark: True
+clustering: True
+ica: True
+pca: True
+rp: True
+kmeans: True
+gmm: True
+
+run_basic: True
+run_nn: False
+run_additional_clustering: True
+
+plot: True
+plot_old_results: False

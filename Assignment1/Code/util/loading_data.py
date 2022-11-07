@@ -1,13 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from scipy.io import arff
-from tests.BaseTest import TestDetails
-# import uci_dataset as dataset
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
-from imblearn.over_sampling import RandomOverSampler
-from util.graphing import plot_correlation_matrix
-
 
 
 class Dataset(object):
@@ -91,6 +86,29 @@ def load_red_wine():
     return load_wine(red_wine_path, 'Red Wine')
 
 
+def load_red_wine_unbalanced():
+    red_wine_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Wine/winequality-red.csv'
+    name = 'Red Wine Unbalanced'
+
+    data_df = pd.read_csv(red_wine_path, sep=';')
+
+    data = data_df.to_numpy()
+
+    X = data[:, 0:-1]
+    y = data[:, -1]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+    # Standardize the data
+    scaler = preprocessing.StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    # Scale only on the training data so we don't leak into the test
+    X_test_scaled = scaler.fit_transform(X_test)
+
+    ds = Dataset(X_train_scaled, y_train, X_test_scaled, y_test, name)
+    return ds
+
+
 def load_white_wine():
     red_wine_path = '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/Wine/winequality-white.csv'
     return load_wine(red_wine_path, 'White Wine')
@@ -133,8 +151,10 @@ def load_cardio():
     # plot_correlation_matrix(df, ds.name, hue=10)
     return ds
 
+
 def load_diabetic():
-    data = arff.loadarff('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
+    data = arff.loadarff(
+        '/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/DiabeticRetinopathy/messidor_features.arff')[0]
     data_df = pd.DataFrame(data).astype(float)
 
     data = data_df.to_numpy()
@@ -166,7 +186,8 @@ def load_diabetic():
 
 
 def load_student_entrance_exam():
-    data = arff.loadarff('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/StudentEntranceExam/CEE_DATA.arff')[0]
+    data = arff.loadarff('/Users/wchen/PycharmProjects/ML/Assignment1/Code/Datasets/StudentEntranceExam/CEE_DATA.arff')[
+        0]
     data_df = pd.DataFrame(data)
 
     data = data_df.to_numpy()
@@ -194,7 +215,6 @@ def load_absenteeism_at_work():
     X = data[:, 0:-1]
     y = data[:, -1]
 
-
     # TODO: This data set is unbalanced
     ros = RandomOverSampler(random_state=0)
     X_resampled, y_resampled = ros.fit_resample(X, y)
@@ -220,6 +240,3 @@ def loading_arff():
     # data = arff.load(open('../data/data.arff', 'r'))['data']
     X = [i[:4] for i in data]
     y = [i[-1] for i in data]
-
-
-

@@ -1,0 +1,6 @@
+paths:
+  root: ${hydra:runtime.cwd}
+  wine: ${hydra:runtime.cwd}/data/winequality-red.csv
+  diabetic: ${hydra:runtime.cwd}/data/messidor_features.arff
+  results_data: /output
+  plots: ./plots

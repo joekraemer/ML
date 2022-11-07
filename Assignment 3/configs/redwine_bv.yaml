@@ -1,0 +1,43 @@
+redwine:
+  benchmark:
+    dims: 8
+    # NN Params
+    arch: [ 50, 50, 50 ]
+    lr: 0.01
+    alpha: 0.01
+  ica:
+    dims: 8
+    # NN Params
+    arch: [ 40, 40, 40 ]
+    lr: 0.01
+    alpha: 0.0001
+  pca:
+    dims: 9
+    # NN Params
+    arch: [ 40, 40 ]
+    lr: 0.01
+    alpha: 0.0001
+  rp:
+    dims: 9
+    # NN Params
+    arch: [ 30, 30, 30 ]
+    lr: 0.01
+    alpha: 0.0001
+  fi:
+    features_to_keep: [ 4,7,2,6,1,9,10 ]
+    # NN Params
+    arch: [ 30, 30, 30 ]
+    lr: 0.01
+    alpha: 0.0001
+  gmm:
+    clusters: 7
+    # NN Params
+    arch: [ 50, 50, 50 ]
+    lr: 0.0001
+    alpha: 0.001
+  kmeans:
+    clusters: 8
+    # NN Params
+    arch: [ 50, 50, 50 ]
+    lr: 0.0001
+    alpha: 0.001

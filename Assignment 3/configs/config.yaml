@@ -1,0 +1,36 @@
+defaults:
+  - gs_params: fast
+  - cluster_analysis: full
+  - dr_analysis: fast
+  - redwine_bv
+  - diabetic_bv
+  - paths
+
+verbose: True
+threads: 16
+seed: 658028
+aws: False
+nn_early_stopping: True
+learning_curves_n_training_sizes: 2
+loss_curves_n_curves: 2
+cv_splits: 5
+
+dataset1: True
+dataset2: True
+
+benchmark: False
+clustering: True
+ica: False
+pca: False
+rp: False
+fi: True
+kmeans: True
+gmm: True
+
+run_basic: True
+run_nn: False
+run_additional_clustering: True
+
+plot: True
+plot_old_results: False
+old_results_path:

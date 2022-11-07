@@ -1,12 +1,11 @@
-from abc import ABC, abstractmethod
 import datetime
+from abc import ABC, abstractmethod
+
 import numpy as np
-
-from sklearn.model_selection import learning_curve, StratifiedShuffleSplit
-
-from util.graphing import plot_learning_curve, plot_scalability
-from util.graphing import plot_hyperparam_validation_curve, plot_hyperparam_validation_bar_chart
 from sklearn.metrics import f1_score
+from sklearn.model_selection import learning_curve, StratifiedShuffleSplit
+from util.graphing import plot_hyperparam_validation_curve, plot_hyperparam_validation_bar_chart
+from util.graphing import plot_learning_curve, plot_scalability
 
 
 class TestDetails(object):
@@ -94,7 +93,7 @@ class BaseTest(ABC):
 
         # self.run_additional()
 
-        # return train_time_ms, query_time_ms, prediction_scores
+        return train_time_ms, query_time_ms, prediction_scores
 
     def multi_run_train_test_timing(self, number_of_runs=1):
         """Make multiple runs to get more accurate timing for testing and training the model"""
@@ -168,9 +167,11 @@ class BaseTest(ABC):
         test_scores_np = np.concatenate(test_scores, axis=1)
 
         if bar_chart:
-            plot_hyperparam_validation_bar_chart(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter, folder=self._details.ds.name)
+            plot_hyperparam_validation_bar_chart(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter,
+                                                 folder=self._details.ds.name)
         else:
-            plot_hyperparam_validation_curve(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter, folder=self._details.ds.name)
+            plot_hyperparam_validation_curve(train_scores_np, test_scores_np, param_list, self.Name, hyperparameter,
+                                             folder=self._details.ds.name)
 
         if self._verbose:
             print("      " + hyperparameter + " validation complete.")
