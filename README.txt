@@ -10,6 +10,6 @@ Clone the repo and then simply call `python run.py` from the main directory
 All of the problems can be run on their own, but to run the whole experiment its better to use run.py which runs all RO and NN tests.
 Clone the repo and then simply call `python run.py` from the main directory
 
-## Assignment 2
+## Assignment 3
 To run the whole experiment its better to use run_experiment.py which runs all DR, clustering and NN tests.
 Clone the repo and then simply call `python run_experiment.py` from the main directory
