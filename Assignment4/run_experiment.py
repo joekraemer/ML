@@ -1,16 +1,15 @@
 import asyncio
 import logging
-from datetime import datetime
-from typing import List, Dict
 
 import hydra
+from hiive.mdptoolbox.mdp import ValueIteration, PolicyIteration, QLearning
 from hydra.core.config_store import ConfigStore
 
+from Assignment4.src.base_experiment import BaseExperiment
 from Assignment4.src.environments.environments import ForestEnvironment, FrozenLakeEnvironment
-from config import A4Config
-from src import plotting
-from src.base_experiment import ExperimentDetails, BaseExperiment
 
+from config import A4Config
+from Assignment4 import plotting
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -21,8 +20,7 @@ async def await_all_tasks(tasks):
     await asyncio.gather(*tasks)
 
 
-async def run_experiment(experiment_details: List[ExperimentDetails], experiment: BaseExperiment,
-                         cfg: A4Config, timings: Dict) -> None:
+async def run_experiment(exp: BaseExperiment) -> None:
     """
 
     :param experiment_details:
@@ -30,26 +28,9 @@ async def run_experiment(experiment_details: List[ExperimentDetails], experiment
     :param cfg:
     :param experiment:
     """
-    t = datetime.now()
-    for details in experiment_details:
-        exp = experiment(details, cfg=cfg)
-        logger.info(" Details: {}".format(details))
+    logger.info("Running {} environment with {} solver".format(exp.environment_name, exp.solver_name))
+    await exp.run()
 
-        if cfg.run_basic:
-            logger.info("Running {} experiment: {}".format(exp.experiment_name, details.ds_name))
-            await exp.perform()
-
-        if cfg.run_nn:
-            logger.info("Running Neural Network analysis")
-            # await exp.perform_nn_grid_search()
-            await exp.perform_nn_performance_analysis()
-
-        if cfg.run_additional_clustering:
-            logger.info("Running additional clustering on top of DR")
-            await exp.perform_cluster()
-
-    t_d = datetime.now() - t
-    timings[exp.experiment_name] = t_d.seconds
     return
 
 
@@ -69,17 +50,22 @@ def main(cfg: A4Config) -> None:
         environments.append(FrozenLakeEnvironment)
 
     tasks = []
-    timings = {}
 
     logger.info("Running experiments")
 
-    if cfg.benchmark:
-        tasks.append(run_experiment(experiment_details, BenchmarkExperiment, cfg, timings))
+    # could be a cfg parameter, but not now
+    for env in environments:
+        exp = BaseExperiment(environment=env, solver=ValueIteration, solver_name='VI', cfg=cfg)
+        tasks.append(run_experiment(exp))
+
+        exp = BaseExperiment(environment=env, solver=PolicyIteration, solver_name='PI', cfg=cfg)
+        tasks.append(run_experiment(exp))
+
+        exp = BaseExperiment(environment=env, solver=QLearning, solver_name='QLearning', cfg=cfg)
+        tasks.append(run_experiment(exp))
 
     # Run experiment tasks
     asyncio.run(await_all_tasks(tasks))
-
-    logger.info("Timings: {}".format(timings))
 
     if cfg.plot:
         if cfg.verbose:

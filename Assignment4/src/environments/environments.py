@@ -7,6 +7,7 @@ from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 class BaseEnvironment:
     def __init__(self, cfg):
         self.cfg = cfg
+        self.Name = ''
         pass
 
     @abstractmethod
