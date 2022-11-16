@@ -1,0 +1,15 @@
+defaults:
+  - gs_params: fast
+  - paths
+
+verbose: True
+threads: 16
+seed: 658028
+aws: False
+
+forest: True
+frozen_lake: True
+
+plot: True
+plot_old_results: False
+old_results_path:
