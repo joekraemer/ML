@@ -5,6 +5,8 @@ from typing import Tuple
 from hiive.mdptoolbox import mdp, example, openai
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 
+from Assignment4.src.environments.FrozenLake import FrozenLakeEnvShaped, FrozenLakeEnvShapedMDPCompatible
+
 
 class FakeEnv:
     """ So that ForestEnvironment can return an object with the same properties as the gymnasium environments"""
@@ -12,6 +14,7 @@ class FakeEnv:
         self.P = p
         self.R = r
         self.env = env
+        self.desc = None
 
 
 class BaseEnvironment:
@@ -40,9 +43,16 @@ class FrozenLakeEnvironment(BaseEnvironment):
         super().__init__(cfg)
         self.Name = 'frozen_lake'
 
-    def build(self, size: int = 10, p: float = 0.8) -> Tuple:
+    def build(self, size: int = 5, p: float = 0.8) -> Tuple:
+        #random_map = generate_random_map(size=size, p=p)
+        env = FrozenLakeEnvShapedMDPCompatible("FrozenLake-v1", map_name='8x8', is_slippery=True)
+        return env
+
+    def base_build(self, size: int = 10, p: float = 0.8) -> Tuple:
         random_map = generate_random_map(size=size, p=p)
         env = openai.OpenAI_MDPToolbox("FrozenLake-v1", desc=random_map, is_slippery=True)
+
+        # Add reward shaping to the environment
         return env
 
         #P, R = example.openai("FrozenLake-v1", desc=random_map, is_slippery=True)

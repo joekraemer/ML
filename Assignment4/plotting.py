@@ -1,5 +1,6 @@
 import glob
 import logging
+import math
 import os
 import re
 from collections import defaultdict
@@ -25,6 +26,31 @@ logger = logging.getLogger(__name__)
 
 solvers = ['PI', 'VI', 'QLearning']
 environments = ['forest', 'frozen_lake']
+
+MAP_COLORS = {
+        'S': 'green',
+        'F': 'skyblue',
+        'H': 'black',
+        'G': 'gold',
+    }
+
+MAP_DIR = {
+        3: '⬆',
+        2: '➡',
+        1: '⬇',
+        0: '⬅'
+    }
+
+FROZEN_LAKE_DESC = [
+        "SFFFFFFF",
+        "FFFFFFFF",
+        "FFFHFFFF",
+        "FFFFFHFF",
+        "FFFHFFFF",
+        "FHHFFFHF",
+        "FHFFHFHF",
+        "FFFHFFFG",
+    ]
 
 # File name regex to pull dataset name
 scree_file_name_regex = re.compile('(.*)_scree\.csv')
@@ -177,6 +203,43 @@ def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> p
     return plt
 
 
+def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
+    size = int(math.sqrt(len(df)))
+    if size != len(FROZEN_LAKE_DESC):
+        return
+
+    policy = np.reshape(df.to_numpy(), (size, size))
+
+    # handle the things that plot_basic normally would
+    plt.close()
+    fig = plt.figure(figsize=(4, 4))
+
+    ax = fig.add_subplot(111, xlim=(0, size), ylim=(0, size))
+    font_size = 'x-large'
+    if size > 16:
+        font_size = 'small'
+    for i in range(size):
+        for j in range(size):
+            y = size - i - 1
+            x = j
+            p = plt.Rectangle([x, y], 1, 1)
+            p.set_facecolor(MAP_COLORS[FROZEN_LAKE_DESC[i][j]])
+            ax.add_patch(p)
+
+            text = ax.text(x + 0.5, y + 0.5, MAP_DIR[policy[i, j]], weight='bold', size=font_size,
+                           horizontalalignment='center', verticalalignment='center', color='w')
+
+    plt.axis('off')
+    plt.xlim((0, size))
+    plt.ylim((0, size))
+
+    return plt
+
+
+def plot_final_policy_forest(df: DataFrame ) -> pyplot:
+    pass
+
+
 def get_solver_name_from_string(s: str) -> str:
     """
     :param s: string (typically a path) that contains solver name
@@ -207,6 +270,22 @@ def read_and_plot_run_stats(problem: str, file: str, output_dir: str) -> None:
 
     return
 
+def read_and_plot_final_policy(problem: str, file: str, output_dir: str) -> None:
+    solver_name = get_solver_name_from_string(file)
+    logger.info("Plotting final policy for file {} to {} ({})".format(file, output_dir, solver_name))
+
+    df = pd.read_csv(file)
+    if problem == 'frozen_lake':
+        p = plot_final_policy_frozen_lake(df=df)
+    else:
+        p = plot_final_policy_forest(df=df)
+
+    p = watermark(p)
+    p.savefig('{}/{}/{}_final_policy.png'.format(output_dir, problem, solver_name),
+        format='png', bbox_inches='tight', dpi=250)
+
+    return
+
 
 def read_and_plot_problem(env_name: str, output_dir: str, input_dir: str, cfg: A4Config):
     env_data_path = '{}/{}'.format(input_dir, env_name)
@@ -218,6 +297,10 @@ def read_and_plot_problem(env_name: str, output_dir: str, input_dir: str, cfg: A
     run_stats_files = glob.glob('{}/**/run_stats.csv'.format(env_data_path), recursive=True)
     logger.info("Results files {}".format(run_stats_files))
     [read_and_plot_run_stats(env_name, f, output_dir) for f in run_stats_files]
+
+    final_policy_files = glob.glob('{}/**/final_policy.csv'.format(env_data_path), recursive=True)
+    logger.info("Results files {}".format(final_policy_files))
+    [read_and_plot_final_policy(env_name, f, output_dir) for f in final_policy_files]
 
 
 def plot_results(cfg: A4Config):

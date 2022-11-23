@@ -2,14 +2,14 @@ defaults:
   - gs_params: fast
   - paths
   - forest_bv
-  - frozen_lake_bv
+  - frozen_lake_bv_debug
 
 verbose: True
 threads: 16
 seed: 658028
 aws: False
 
-forest_enable: True
+forest_enable: False
 frozen_lake_enable: True
 
 plot: True

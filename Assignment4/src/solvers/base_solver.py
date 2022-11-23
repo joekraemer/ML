@@ -25,6 +25,10 @@ class BaseSolver(ABC):
     def get_run_stats(self) -> List[Dict]:
         return self._solver.run_stats
 
+    def get_final_policy(self) -> List:
+        temp = list(self._solver.policy)
+        return temp
+
 
 class StaticSolver(BaseSolver):
     """Solvers that just use P, V to solve a problem"""
@@ -33,6 +37,7 @@ class StaticSolver(BaseSolver):
 
     def build(self, env, cfg):
         self.cfg = cfg
+        self.desc = env.env.desc
         self._build(env.P, env.R, cfg)
         return
 
@@ -50,6 +55,7 @@ class QLearningSolver(BaseSolver):
         self.cfg = cfg
 
         if type(env) is FakeEnv:
+            self.desc = env.env.desc
             self._solver = mdp.QLearning(env.P, env.R,
                                          gamma=cfg.gamma,
                                          epsilon_decay=cfg.epsilon_decay,
@@ -59,6 +65,7 @@ class QLearningSolver(BaseSolver):
                                          alpha_decay=cfg.alpha_decay)
 
         else:
+            self.desc = env.env.desc
             self._solver = QLearner(env, cfg)
         return
 

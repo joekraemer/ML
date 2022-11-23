@@ -31,12 +31,12 @@ class QLearner(object):
     def run(self):
         """run the agent through the environment"""
         self.Q = np.zeros((self.NumStates, self.NumActions))
+        run_stats = []
 
         for e in range(0, self.MaxEpisodes):
             s, info = self.env.reset()
 
             self.time = time.time()
-            run_stats = []
             done = False
             while not done:
                 a = self.select_action(s, self.Q, self.epsilon, self.env)

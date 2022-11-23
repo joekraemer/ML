@@ -39,6 +39,9 @@ class BaseExperiment:
         logger.info('Logging experiment results')
         res_df = pd.DataFrame(self.solver.get_run_stats())
         res_df.to_csv(self._out.format('run_stats.csv'), index=False)
+
+        res_df = pd.DataFrame(self.solver.get_final_policy())
+        res_df.to_csv(self._out.format('final_policy.csv'), index=False)
         return
 
     def get_name(self):

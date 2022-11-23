@@ -1,0 +1,16 @@
+frozen_lake:
+  VI:
+    gamma: 0.99
+    epsilon: 0.01 # convergence threshold
+    max_iter: 100
+  PI:
+    gamma: 0.99
+    max_iter: 100
+  QLearning:
+    gamma: 0.99
+    alpha: 0.25
+    alpha_decay: 1
+    epsilon_decay: 0.99
+    epsilon_min: 0.1
+    max_iter: 100
+
