@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 
 from typing import List
 
+from Assignment4.src.solvers.config import AllSolverConfig
+
 
 @dataclass
 class Paths:
@@ -25,13 +27,16 @@ class A4Config:
     paths: Paths
     gs_params: GSParams
 
+    forest: AllSolverConfig
+    frozen_lake: AllSolverConfig
+
     verbose: bool
     threads: int
     seed: int
     aws: bool
 
-    forest: bool
-    frozen_lake: bool
+    forest_enable: bool
+    frozen_lake_enable: bool
 
     plot: bool
     plot_old_results: bool

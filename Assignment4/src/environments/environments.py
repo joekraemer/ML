@@ -1,7 +1,17 @@
 from abc import abstractmethod
+from dataclasses import dataclass
+from typing import Tuple
 
-from hiive.mdptoolbox import mdp, example
+from hiive.mdptoolbox import mdp, example, openai
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
+
+
+class FakeEnv:
+    """ So that ForestEnvironment can return an object with the same properties as the gymnasium environments"""
+    def __init__(self, p, r, env=None):
+        self.P = p
+        self.R = r
+        self.env = env
 
 
 class BaseEnvironment:
@@ -16,26 +26,25 @@ class BaseEnvironment:
 
 
 class ForestEnvironment(BaseEnvironment):
-    def __init__(self, cfg, size: int = 10, p: float = 0.98):
+    def __init__(self, cfg):
         super().__init__(cfg)
-        self.Size = size
-        self.P = p
         self.Name = 'forest'
 
-    def build(self, size: int = 10, p: float = 0.98):
+    def build(self, size: int = 10, p: float = 0.1) -> Tuple:
         P, R = example.forest(S=size, p=p, is_sparse=True)
-        return P, R
+        return FakeEnv(P, R)  # P is the transition matrix and R is the reward matrix
 
 
 class FrozenLakeEnvironment(BaseEnvironment):
-    def __init__(self, cfg, size: int = 10, p: float = 0.98):
+    def __init__(self, cfg):
         super().__init__(cfg)
-        self.Size = size
-        self.P = p
         self.Name = 'frozen_lake'
 
-    def build(self, size: int = 10, p: float = 0.98):
+    def build(self, size: int = 10, p: float = 0.8) -> Tuple:
         random_map = generate_random_map(size=size, p=p)
-        P, R = example.openai("FrozenLake-v1", desc=random_map)
-        return P, R
+        env = openai.OpenAI_MDPToolbox("FrozenLake-v1", desc=random_map, is_slippery=True)
+        return env
+
+        #P, R = example.openai("FrozenLake-v1", desc=random_map, is_slippery=True)
+        #return P, R  # P is the transition matrix and R is the reward matrix
 

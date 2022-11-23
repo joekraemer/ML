@@ -163,10 +163,17 @@ def plot_basic(title: str, xlabel: str, ylabel: str, width: int = 4, height: int
     return
 
 
-def plot_reward_iteration(df, xlabel='Iteration', ylabel='Reward') -> pyplot:
+def plot_reward_iteration(df: DataFrame, xlabel='Iteration', ylabel='Reward') -> pyplot:
     plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
 
     plt.plot(df['Iteration'], df['Reward'], 'o-', linewidth=1, markersize=2)
+    return plt
+
+
+def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> pyplot:
+    plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
+
+    plt.plot(df['Iteration'], df['Error'], 'o-', linewidth=1, markersize=2)
     return plt
 
 
@@ -185,10 +192,17 @@ def read_and_plot_run_stats(problem: str, file: str, output_dir: str) -> None:
     logger.info("Plotting run stats for file {} to {} ({})".format(file, output_dir, solver_name))
 
     df = pd.read_csv(file)
+
     p = plot_reward_iteration(df=df)
     p = watermark(p)
     p.savefig(
         '{}/{}/{}_reward_iteration.png'.format(output_dir, problem, solver_name),
+        format='png', bbox_inches='tight', dpi=250)
+
+    p = plot_error_iteration(df=df)
+    p = watermark(p)
+    p.savefig(
+        '{}/{}/{}_error_iteration.png'.format(output_dir, problem, solver_name),
         format='png', bbox_inches='tight', dpi=250)
 
     return

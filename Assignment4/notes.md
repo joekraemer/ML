@@ -1,23 +1,16 @@
+# TODO
+- [x] Create separate solver classes ( or at least solver builders )
+- [x] Create config files for separate solver classes
+- [ ] Visualize the policies of the solver
+- [ ] Q Learning is somehow broken with Frozen Lake
+- [ ] Create combined plots
+  - [ ] hyper parameter 
+- [ ] Create a runtime comparison experiment
+- [ ] Create a runtime comparison visualization
+- [ ] Repeat experiments to capture variation between runs (definitely for QLearning)
+- [ ] saved plots every few hundred episodes and turned them into a gif with imageio]
+
 # Stream of consciousness
-So I have 3 solvers, and 2 environments
+I can either change the QLearner class or change the environment
 
-This could be setup 6 unique experiments that run independently
-
-so maybe I make an experiment object that takes a solver and environment
-
-
-I'm going to want the folder structure to be like this
-    output
-        |
-        ---> frozen_lake
-                |
-                ---> VI
-                ---> PI
-                ---> QLearning
-        |
-        ---> forest
-                |
-                ---> VI
-                ---> PI
-                ---> QLearning
 

@@ -2,11 +2,11 @@ import asyncio
 import logging
 
 import hydra
-from hiive.mdptoolbox.mdp import ValueIteration, PolicyIteration, QLearning
 from hydra.core.config_store import ConfigStore
 
 from Assignment4.src.base_experiment import BaseExperiment
 from Assignment4.src.environments.environments import ForestEnvironment, FrozenLakeEnvironment
+from Assignment4.src.solvers.base_solver import VISolver, PISolver, QLearningSolver
 
 from config import A4Config
 from Assignment4 import plotting
@@ -44,9 +44,9 @@ def main(cfg: A4Config) -> None:
     logger.info("----------")
 
     environments = []
-    if cfg.forest:
+    if cfg.forest_enable:
         environments.append(ForestEnvironment)
-    if cfg.frozen_lake:
+    if cfg.frozen_lake_enable:
         environments.append(FrozenLakeEnvironment)
 
     tasks = []
@@ -55,13 +55,13 @@ def main(cfg: A4Config) -> None:
 
     # could be a cfg parameter, but not now
     for env in environments:
-        exp = BaseExperiment(environment=env, solver=ValueIteration, solver_name='VI', cfg=cfg)
+        exp = BaseExperiment(environment=env, solver=VISolver, solver_name='VI', cfg=cfg)
         tasks.append(run_experiment(exp))
 
-        exp = BaseExperiment(environment=env, solver=PolicyIteration, solver_name='PI', cfg=cfg)
+        exp = BaseExperiment(environment=env, solver=PISolver, solver_name='PI', cfg=cfg)
         tasks.append(run_experiment(exp))
 
-        exp = BaseExperiment(environment=env, solver=QLearning, solver_name='QLearning', cfg=cfg)
+        exp = BaseExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
         tasks.append(run_experiment(exp))
 
     # Run experiment tasks

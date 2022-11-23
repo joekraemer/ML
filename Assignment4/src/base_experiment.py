@@ -1,20 +1,28 @@
 import os
+import logging
+import time
 from typing import Type
 
 from hiive.mdptoolbox.mdp import MDP
 
 from Assignment4.src.environments.environments import BaseEnvironment
+from Assignment4.src.solvers.base_solver import BaseSolver
+
 import pandas as pd
 
 
+logger = logging.getLogger(__name__)
+
+
 class BaseExperiment:
-    def __init__(self, cfg, environment: Type[BaseEnvironment], solver: Type[MDP], solver_name: str):
+    def __init__(self, cfg, environment: Type[BaseEnvironment], solver: Type[BaseSolver], solver_name: str):
         self.cfg = cfg
 
         # Setup the environment and solver
         self.environment = environment(cfg=cfg)
-        P, R = self.environment.build()
-        self.solver = solver(P, R, 0.9)
+        env = self.environment.build()
+        self.solver = solver()
+        self.solver.build(env, cfg=cfg[self.environment.Name][self.solver.Name])
 
         self.solver_name = solver_name
         self.environment_name = self.environment.Name
@@ -28,8 +36,8 @@ class BaseExperiment:
     async def run(self) -> None:
         self.solver.run()
 
-        print('Logging experiment results')
-        res_df = pd.DataFrame(self.solver.run_stats)
+        logger.info('Logging experiment results')
+        res_df = pd.DataFrame(self.solver.get_run_stats())
         res_df.to_csv(self._out.format('run_stats.csv'), index=False)
         return
 

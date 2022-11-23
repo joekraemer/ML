@@ -1,0 +1,16 @@
+forest:
+  VI:
+    gamma: 0.99
+    epsilon: 0.00001 # the convergence criterion
+    max_iter: 100000
+  PI:
+    gamma: 0.99
+    max_iter: 10000
+  QLearning:
+    gamma: 0.99
+    alpha: 0.25
+    alpha_decay: 1
+    epsilon_decay: 0.999
+    epsilon_min: 0.02
+    max_iter: 100000
+
