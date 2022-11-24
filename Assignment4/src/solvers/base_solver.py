@@ -37,7 +37,7 @@ class StaticSolver(BaseSolver):
 
     def build(self, env, cfg):
         self.cfg = cfg
-        self.desc = env.env.desc
+        self.desc = env.desc if type(env) is FakeEnv else env.env.desc
         self._build(env.P, env.R, cfg)
         return
 
@@ -55,7 +55,7 @@ class QLearningSolver(BaseSolver):
         self.cfg = cfg
 
         if type(env) is FakeEnv:
-            self.desc = env.env.desc
+            self.desc = env.desc
             self._solver = mdp.QLearning(env.P, env.R,
                                          gamma=cfg.gamma,
                                          epsilon_decay=cfg.epsilon_decay,

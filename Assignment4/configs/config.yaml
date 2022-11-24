@@ -9,7 +9,7 @@ threads: 16
 seed: 658028
 aws: False
 
-forest_enable: False
+forest_enable: True
 frozen_lake_enable: True
 
 plot: True
