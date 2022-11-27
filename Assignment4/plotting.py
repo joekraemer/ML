@@ -191,15 +191,26 @@ def plot_basic(title: str, xlabel: str, ylabel: str, width: int = 4, height: int
 
 def plot_reward_iteration(df: DataFrame, xlabel='Iteration', ylabel='Reward') -> pyplot:
     plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
+    # decide the rolling window size based on the total length of the dataframe
+    window = max(1, int(df.shape[0] / 10))
 
-    plt.plot(df['Iteration'], df['Reward'], 'o-', linewidth=1, markersize=2)
+    mean = df['Reward'].rolling(window=window, min_periods=1).mean()
+    std = df['Reward'].rolling(window=window, min_periods=1).std()
+    plt.plot(df['Iteration'],  mean, color='g')
+    # plt.fill_between( df['Iteration'], mean - std, mean + std, alpha=0.1, color="g",)
     return plt
 
 
 def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> pyplot:
     plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
 
-    plt.plot(df['Iteration'], df['Error'], 'o-', linewidth=1, markersize=2)
+    # decide the rolling window size based on the total length of the dataframe
+    window = max(1, int(df.shape[0] / 10))
+
+    mean = df['Error'].rolling(window=window, min_periods=1).mean()
+    std = df['Error'].rolling(window=window, min_periods=1).std()
+
+    plt.plot( df['Iteration'], mean, color='r')
     return plt
 
 
@@ -226,7 +237,7 @@ def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
             p.set_facecolor(MAP_COLORS[FROZEN_LAKE_DESC[i][j]])
             ax.add_patch(p)
 
-            text = ax.text(x + 0.5, y + 0.5, MAP_DIR[policy[i, j]], weight='bold', size=font_size,
+            ax.text(x + 0.5, y + 0.5, MAP_DIR[policy[i, j]], weight='bold', size=font_size,
                            horizontalalignment='center', verticalalignment='center', color='w')
 
     plt.axis('off')
@@ -236,8 +247,20 @@ def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
     return plt
 
 
-def plot_final_policy_forest(df: DataFrame ) -> pyplot:
-    pass
+def save_final_policy_forest(df: DataFrame, problem: str, solver_name: str, output_dir: str) -> None:
+
+    final_policy = list(df.iloc[:,0])
+    save_path = '{}/{}/{}_final_policy.txt'.format(output_dir, problem, solver_name)
+
+    header_string = 'Algorithm & Env & Policy  \\' + '\\'
+    line_string = '{} & {} & {} \\'.format(solver_name, problem, final_policy) + '\\'
+
+    if not os.path.exists(save_path):
+        lines = [header_string, line_string]
+    else:
+        lines = [line_string]
+
+    _save_lines_to_file(lines, save_path)
 
 
 def get_solver_name_from_string(s: str) -> str:
@@ -268,7 +291,44 @@ def read_and_plot_run_stats(problem: str, file: str, output_dir: str) -> None:
         '{}/{}/{}_error_iteration.png'.format(output_dir, problem, solver_name),
         format='png', bbox_inches='tight', dpi=250)
 
+    # log the final run times
+    save_final_run_times(df, problem, solver_name, output_dir)
+
+    # create a policy gif
+    save_policy_gif(df, problem, solver_name, output_dir)
+
     return
+
+
+def save_policy_gif(df: DataFrame, problem: str, solver_name: str, output: str) -> None:
+
+
+    return
+
+
+def save_final_run_times(df: DataFrame, problem: str, solver_name: str, output_dir: str) -> None:
+
+    total_time = df.tail(1)['Time'].values[-1]
+    save_path = '{}/final_run_times.txt'.format(output_dir)
+
+    header_string = 'Algorithm & Env & Time \\' + '\\'
+    line_string = '{} & {} & {:.3f} \\'.format(solver_name, problem, total_time) + '\\'
+
+    if not os.path.exists(save_path):
+        lines = [header_string, line_string]
+    else:
+        lines = [line_string]
+
+    _save_lines_to_file(lines, save_path)
+
+
+def _save_lines_to_file(lines: List[str], path: str):
+    with open(path, 'a') as f:
+        for line in lines:
+            f.write(line)
+            f.write('\n')
+    return
+
 
 def read_and_plot_final_policy(problem: str, file: str, output_dir: str) -> None:
     solver_name = get_solver_name_from_string(file)
@@ -277,12 +337,11 @@ def read_and_plot_final_policy(problem: str, file: str, output_dir: str) -> None
     df = pd.read_csv(file)
     if problem == 'frozen_lake':
         p = plot_final_policy_frozen_lake(df=df)
+        p = watermark(p)
+        p.savefig('{}/{}/{}_final_policy.png'.format(output_dir, problem, solver_name),
+                  format='png', bbox_inches='tight', dpi=250)
     else:
-        p = plot_final_policy_forest(df=df)
-
-    p = watermark(p)
-    p.savefig('{}/{}/{}_final_policy.png'.format(output_dir, problem, solver_name),
-        format='png', bbox_inches='tight', dpi=250)
+        save_final_policy_forest(df, problem, solver_name, output_dir)
 
     return
 

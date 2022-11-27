@@ -2,7 +2,7 @@ defaults:
   - gs_params: fast
   - paths
   - forest_bv
-  - frozen_lake_bv_debug
+  - frozen_lake_bv
 
 verbose: True
 threads: 16

@@ -33,7 +33,7 @@ class ForestEnvironment(BaseEnvironment):
         super().__init__(cfg)
         self.Name = 'forest'
 
-    def build(self, size: int = 10, p: float = 0.1) -> Tuple:
+    def build(self, size: int = 20, p: float = 0.05) -> Tuple:
         P, R = example.forest(S=size, p=p, is_sparse=True)
         return FakeEnv(P, R)  # P is the transition matrix and R is the reward matrix
 

@@ -1,28 +1,32 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 
 @dataclass
-class SolverConfig:
+class PIConfig:
     gamma: float
-    max_iter: int
 
 
 @dataclass
-class VIConfig(SolverConfig):
+class VIConfig:
+    gamma: float
     epsilon: float
 
 
 @dataclass
-class QLearningConfig(SolverConfig):
+class QLearningConfig:
+    gamma: float
     alpha: float
     alpha_decay: float
     epsilon_decay: float
     epsilon_min: float
+    convergence_value: float
+    epsilon_decay_values: List[int] = field(default_factory=list)
 
 
 @dataclass
 class AllSolverConfig:
     VI: VIConfig
-    PI: SolverConfig
+    PI: PIConfig
     QLearning: QLearningConfig
 

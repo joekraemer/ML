@@ -10,7 +10,6 @@ from Assignment4.src.solvers.base_solver import BaseSolver
 
 import pandas as pd
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,13 +36,63 @@ class BaseExperiment:
         self.solver.run()
 
         logger.info('Logging experiment results')
-        res_df = pd.DataFrame(self.solver.get_run_stats())
-        res_df.to_csv(self._out.format('run_stats.csv'), index=False)
+        self._save_run_stats()
+        self._save_final_policy()
+        return
 
+    def _save_final_policy(self, name: str = 'final_policy.csv') -> None:
         res_df = pd.DataFrame(self.solver.get_final_policy())
-        res_df.to_csv(self._out.format('final_policy.csv'), index=False)
+        res_df.to_csv(self._out.format(name), index=False)
+        return
+
+    def _save_run_stats(self, name: str = 'run_stats.csv'):
+        res_df = pd.DataFrame(self.solver.get_run_stats())
+        res_df.to_csv(self._out.format(name), index=False)
         return
 
     def get_name(self):
         return self.environment.Name + ' ' + self.solver_name
 
+
+class ExploreExploitExperiment(BaseExperiment):
+    """Experiment to investigate the exploration exploitation tradeoff"""
+
+    def __init__(self, cfg, environment: Type[BaseEnvironment], solver: Type[BaseSolver], solver_name: str):
+        super().__init__(cfg, environment, solver, solver_name)
+
+        self.epsilon_decay_values = cfg[self.environment.Name].QLearning.epsilon_decay_values
+
+        self.SolverClass = solver
+        pass
+
+    async def run(self) -> None:
+        pass
+        for eps in self.epsilon_decay_values:
+            solver = self.SolverClass()
+            base_cfg = self.cfg[self.environment.Name][self.solver.Name]
+            cfg = base_cfg ** {'epsilon_decay': eps}
+            solver.build(self.environment, cfg=cfg)
+
+        return
+
+
+class StateSpaceSizeExperiment(BaseExperiment):
+    """Experiment to investigate the exploration exploitation tradeoff"""
+
+    def __init__(self, cfg, environment: Type[BaseEnvironment], solver: Type[BaseSolver], solver_name: str):
+        super().__init__(cfg, environment, solver, solver_name)
+
+        self.epsilon_decay_values = cfg[self.environment.Name].QLearning.epsilon_decay_values
+
+        self.SolverClass = solver
+        pass
+
+    async def run(self) -> None:
+        pass
+        for eps in self.epsilon_decay_values:
+            solver = self.SolverClass()
+            base_cfg = self.cfg[self.environment.Name][self.solver.Name]
+            cfg = base_cfg ** {'epsilon_decay': eps}
+            solver.build(self.environment, cfg=cfg)
+
+        return

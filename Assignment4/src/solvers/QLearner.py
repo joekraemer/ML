@@ -6,6 +6,7 @@ from math import sqrt
 from gym.envs import toy_text
 
 from Assignment4.src.solvers.config import QLearningConfig
+import hiive.mdptoolbox.util as _util
 
 
 class QLearner(object):
@@ -18,23 +19,26 @@ class QLearner(object):
         self.eps_decay = cfg.epsilon_decay
         self.eps_end = cfg.epsilon_min
 
-        self.MaxEpisodes = cfg.max_iter
+        self.MaxEpisodes = 100000
 
         self.env = env_wrapper.env
 
         self.NumStates = self.env.observation_space.n
         self.NumActions = self.env.action_space.n
 
-        self.ConvergenceValue = 0.0001
+        self.ConvergenceValue = cfg.convergence_value
         self.run_stats = None
 
     def run(self):
         """run the agent through the environment"""
         self.Q = np.zeros((self.NumStates, self.NumActions))
+        self.V = self.Q.max(axis=1)
         run_stats = []
 
         for e in range(0, self.MaxEpisodes):
+
             s, info = self.env.reset()
+            Qprev = self.Q.copy()
 
             self.time = time.time()
             done = False
@@ -51,16 +55,20 @@ class QLearner(object):
                 self.Q[s, a] += update_component
 
                 error = np.absolute(update_component)
-
-                # compute the value function and the policy
-                v = self.Q.max(axis=1)
-                self.V = v
-                p = self.Q.argmax(axis=1)
-                self.policy = p
-
-                run_stats.append(self._build_run_stat(i=e, s=s, a=a, r=r, p=p, v=v, error=error))
-
                 s = s_prime
+
+            # compute the value function and the policy
+            v = self.Q.max(axis=1)
+            self.V = v
+            p = self.Q.argmax(axis=1)
+            self.policy = p
+            error = _util.getSpan(self.Q - Qprev)
+
+            run_stats.append(self._build_run_stat(i=e, s=s, a=None, r=np.max(self.V), p=p, v=v, error=error))
+
+
+            if error < self.ConvergenceValue:
+                break
 
             if self.epsilon > self.eps_end:
                 self.epsilon = self.epsilon * self.eps_decay
@@ -105,6 +113,6 @@ class QLearner(object):
             'Mean V': np.mean(v),
             'Iteration': i,
             # 'Value': v.copy(),
-            # 'Policy': p.copy()
+            'Policy': p.copy()
         }
         return run_stat
