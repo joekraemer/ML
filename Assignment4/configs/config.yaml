@@ -10,7 +10,7 @@ seed: 658028
 aws: False
 
 forest_enable: True
-frozen_lake_enable: True
+frozen_lake_enable: False
 
 plot: True
 plot_old_results: False

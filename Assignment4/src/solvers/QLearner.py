@@ -66,7 +66,6 @@ class QLearner(object):
 
             run_stats.append(self._build_run_stat(i=e, s=s, a=None, r=np.max(self.V), p=p, v=v, error=error))
 
-
             if error < self.ConvergenceValue:
                 break
 

@@ -4,7 +4,7 @@ import logging
 import hydra
 from hydra.core.config_store import ConfigStore
 
-from Assignment4.src.base_experiment import BaseExperiment
+from Assignment4.src.base_experiment import BaseExperiment, ExploreExploitExperiment
 from Assignment4.src.environments.environments import ForestEnvironment, FrozenLakeEnvironment
 from Assignment4.src.solvers.base_solver import VISolver, PISolver, QLearningSolver
 
@@ -55,14 +55,18 @@ def main(cfg: A4Config) -> None:
 
     # could be a cfg parameter, but not now
     for env in environments:
+        exp = ExploreExploitExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
+        tasks.append(run_experiment(exp))
+
         exp = BaseExperiment(environment=env, solver=VISolver, solver_name='VI', cfg=cfg)
         tasks.append(run_experiment(exp))
 
         exp = BaseExperiment(environment=env, solver=PISolver, solver_name='PI', cfg=cfg)
         tasks.append(run_experiment(exp))
 
-        exp = BaseExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
+        #exp = BaseExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
         tasks.append(run_experiment(exp))
+
 
     # Run experiment tasks
     asyncio.run(await_all_tasks(tasks))

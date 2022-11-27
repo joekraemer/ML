@@ -189,7 +189,7 @@ def plot_basic(title: str, xlabel: str, ylabel: str, width: int = 4, height: int
     return
 
 
-def plot_reward_iteration(df: DataFrame, xlabel='Iteration', ylabel='Reward') -> pyplot:
+def plot_max_utility_iteration(df: DataFrame, xlabel='Iteration', ylabel='Max Utility') -> pyplot:
     plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
     # decide the rolling window size based on the total length of the dataframe
     window = max(1, int(df.shape[0] / 10))
@@ -207,10 +207,25 @@ def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> p
     # decide the rolling window size based on the total length of the dataframe
     window = max(1, int(df.shape[0] / 10))
 
-    mean = df['Error'].rolling(window=window, min_periods=1).mean()
+    mean = df['Error'].rolling(window=window).mean()
     std = df['Error'].rolling(window=window, min_periods=1).std()
 
-    plt.plot( df['Iteration'], mean, color='r')
+    plt.plot( df['Iteration'], df['Error'], color='r')
+
+    temp_df = df.reindex().sort_index(ascending=False)
+    last_policy = df.tail(1)['Policy'].values[0]
+
+    last_policy_change = 0
+    # determine where the policy last changed
+    for i in temp_df.iterrows():
+        if i[1].Policy != last_policy:
+            last_policy_change = i[1].Iteration + 1
+            break
+
+    ax = plt.gca()
+    ax.axvline(x=last_policy_change, linestyle="--", label="Last Policy Change: {}".format(last_policy_change))
+
+    plt.legend()
     return plt
 
 
@@ -247,9 +262,22 @@ def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
     return plt
 
 
+def plot_explore_exploit(df: DataFrame, xlabel='Episode', ylabel='Avg Reward') -> pyplot:
+    plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
+    # decide the rolling window size based on the total length of the dataframe
+    window = max(1, int(df.shape[0] / 20))
+
+    for col in df.columns:
+        mean = col.rolling(window=window, min_periods=1).mean()
+        std = col.rolling(window=window, min_periods=1).std()
+        # plt.plot(df['Iteration'], mean, color='g')
+        plt.fill_between(col.index, mean - std, mean + std, alpha=0.1, color="g",)
+    return plt
+
+
 def save_final_policy_forest(df: DataFrame, problem: str, solver_name: str, output_dir: str) -> None:
 
-    final_policy = list(df.iloc[:,0])
+    final_policy = list(df.iloc[:, 0])
     save_path = '{}/{}/{}_final_policy.txt'.format(output_dir, problem, solver_name)
 
     header_string = 'Algorithm & Env & Policy  \\' + '\\'
@@ -259,6 +287,9 @@ def save_final_policy_forest(df: DataFrame, problem: str, solver_name: str, outp
         lines = [header_string, line_string]
     else:
         lines = [line_string]
+
+    ind = [i for i, value in enumerate(final_policy) if value == 1]
+    lines.extend(['', 'Chop Locations', str(ind)])
 
     _save_lines_to_file(lines, save_path)
 
@@ -279,7 +310,7 @@ def read_and_plot_run_stats(problem: str, file: str, output_dir: str) -> None:
 
     df = pd.read_csv(file)
 
-    p = plot_reward_iteration(df=df)
+    p = plot_max_utility_iteration(df=df)
     p = watermark(p)
     p.savefig(
         '{}/{}/{}_reward_iteration.png'.format(output_dir, problem, solver_name),
@@ -346,6 +377,19 @@ def read_and_plot_final_policy(problem: str, file: str, output_dir: str) -> None
     return
 
 
+def read_and_plot_explore_exploit(problem: str, file: str, output_dir: str) -> None:
+    solver_name = get_solver_name_from_string(file)
+    logger.info("Plotting run explore exploit experiment for file {} to {} ({})".format(file, output_dir, solver_name))
+
+    df = pd.read_csv(file)
+
+    p = plot_explore_exploit(df=df)
+    p = watermark(p)
+    p.savefig(
+        '{}/{}/{}_explore_exploit_reward.png'.format(output_dir, problem, solver_name),
+        format='png', bbox_inches='tight', dpi=250)
+
+
 def read_and_plot_problem(env_name: str, output_dir: str, input_dir: str, cfg: A4Config):
     env_data_path = '{}/{}'.format(input_dir, env_name)
 
@@ -360,6 +404,10 @@ def read_and_plot_problem(env_name: str, output_dir: str, input_dir: str, cfg: A
     final_policy_files = glob.glob('{}/**/final_policy.csv'.format(env_data_path), recursive=True)
     logger.info("Results files {}".format(final_policy_files))
     [read_and_plot_final_policy(env_name, f, output_dir) for f in final_policy_files]
+
+    exp_files = glob.glob('{}/**/explore_exploit_reward.csv'.format(env_data_path), recursive=True)
+    logger.info("Results files {}".format(exp_files))
+    [read_and_plot_explore_exploit(env_name, f, output_dir) for f in exp_files]
 
 
 def plot_results(cfg: A4Config):

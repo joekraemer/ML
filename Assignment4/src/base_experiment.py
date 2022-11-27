@@ -19,9 +19,9 @@ class BaseExperiment:
 
         # Setup the environment and solver
         self.environment = environment(cfg=cfg)
-        env = self.environment.build()
+        self._env = self.environment.build()
         self.solver = solver()
-        self.solver.build(env, cfg=cfg[self.environment.Name][self.solver.Name])
+        self.solver.build(self._env, cfg=cfg[self.environment.Name][self.solver.Name])
 
         self.solver_name = solver_name
         self.environment_name = self.environment.Name
@@ -61,18 +61,25 @@ class ExploreExploitExperiment(BaseExperiment):
         super().__init__(cfg, environment, solver, solver_name)
 
         self.epsilon_decay_values = cfg[self.environment.Name].QLearning.epsilon_decay_values
-
         self.SolverClass = solver
         pass
 
     async def run(self) -> None:
-        pass
+        reward_df = pd.DataFrame()
+        epsilon_df = pd.DataFrame()
+
         for eps in self.epsilon_decay_values:
             solver = self.SolverClass()
-            base_cfg = self.cfg[self.environment.Name][self.solver.Name]
-            cfg = base_cfg ** {'epsilon_decay': eps}
-            solver.build(self.environment, cfg=cfg)
+            temp_cfg = self.cfg[self.environment.Name][self.solver.Name].copy()
+            temp_cfg['epsilon_decay'] = eps
+            solver.build(self._env, cfg=temp_cfg)
+            solver.run()
+            stats = pd.DataFrame(solver.get_run_stats())
+            reward_df[eps] = stats['Reward']
+            epsilon_df[eps] = stats['Epsilon']
 
+        reward_df.to_csv(self._out.format('explore_exploit_reward'), index=False)
+        epsilon_df.to_csv(self._out.format('explore_exploit_epsilon'), index=False)
         return
 
 
@@ -88,11 +95,15 @@ class StateSpaceSizeExperiment(BaseExperiment):
         pass
 
     async def run(self) -> None:
-        pass
+
+        df = pd.DataFrame()
+
         for eps in self.epsilon_decay_values:
             solver = self.SolverClass()
             base_cfg = self.cfg[self.environment.Name][self.solver.Name]
             cfg = base_cfg ** {'epsilon_decay': eps}
             solver.build(self.environment, cfg=cfg)
-
+            solver.run()
+            stats = solver.get_run_stats()
+            df[eps] = stats['Reward']
         return

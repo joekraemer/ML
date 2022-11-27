@@ -1,11 +1,11 @@
 forest:
   VI:
-    gamma: 0.99
-    epsilon: 0.00001 # the convergence criterion
+    gamma: 0.9999
+    epsilon: 0.1 # the convergence criterion
   PI:
-    gamma: 0.99
+    gamma: 0.9999
   QLearning:
-    gamma: 0.99
+    gamma: 0.9999
     alpha: 0.25
     alpha_decay: 1
     epsilon_decay: 0.999
