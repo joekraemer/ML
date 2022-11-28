@@ -19,7 +19,7 @@ class QLearner(object):
         self.eps_decay = cfg.epsilon_decay
         self.eps_end = cfg.epsilon_min
 
-        self.MaxEpisodes = 100000
+        self.MaxEpisodes = cfg.max_iterations
 
         self.env = env_wrapper.env
 
@@ -34,13 +34,14 @@ class QLearner(object):
         self.Q = np.zeros((self.NumStates, self.NumActions))
         self.V = self.Q.max(axis=1)
         run_stats = []
+        error_list = []
+        self.time = time.time()
 
         for e in range(0, self.MaxEpisodes):
 
             s, info = self.env.reset()
             Qprev = self.Q.copy()
 
-            self.time = time.time()
             done = False
             while not done:
                 a = self.select_action(s, self.Q, self.epsilon, self.env)
@@ -65,9 +66,13 @@ class QLearner(object):
             error = _util.getSpan(self.Q - Qprev)
 
             run_stats.append(self._build_run_stat(i=e, s=s, a=None, r=np.max(self.V), p=p, v=v, error=error))
+            error_list.append(error)
 
-            if error < self.ConvergenceValue:
-                break
+            window = 100
+            if error >= window:
+                rolling_error = np.mean(error[:-window])
+                if rolling_error < self.ConvergenceValue:
+                    break
 
             if self.epsilon > self.eps_end:
                 self.epsilon = self.epsilon * self.eps_decay

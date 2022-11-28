@@ -75,11 +75,12 @@ class ExploreExploitExperiment(BaseExperiment):
             solver.build(self._env, cfg=temp_cfg)
             solver.run()
             stats = pd.DataFrame(solver.get_run_stats())
+            stats = stats.set_index('Iteration')
             reward_df[eps] = stats['Reward']
             epsilon_df[eps] = stats['Epsilon']
 
-        reward_df.to_csv(self._out.format('explore_exploit_reward'), index=False)
-        epsilon_df.to_csv(self._out.format('explore_exploit_epsilon'), index=False)
+        reward_df.to_csv(self._out.format('explore_exploit_reward.csv'), index=True)
+        epsilon_df.to_csv(self._out.format('explore_exploit_epsilon.csv'), index=True)
         return
 
 

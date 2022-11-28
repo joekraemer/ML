@@ -61,7 +61,9 @@ class QLearningSolver(BaseSolver):
                                          epsilon_decay=cfg.epsilon_decay,
                                          epsilon_min=cfg.epsilon_min,
                                          alpha=cfg.alpha,
-                                         alpha_decay=cfg.alpha_decay)
+                                         alpha_decay=cfg.alpha_decay,
+                                         convergence_value=cfg.convergence_value,
+                                         n_iter=cfg.max_iterations)
 
         else:
             self.desc = env.env.desc
@@ -87,7 +89,7 @@ class PISolver(StaticSolver):
         pass
 
     def _build(self, P, R, cfg):
-        self._solver = mdp.PolicyIteration(P, R, gamma=cfg.gamma)
+        self._solver = mdp.PolicyIteration(P, R, gamma=cfg.gamma, convergence_value=cfg.convergence_value)
         return
 
 

@@ -9,8 +9,6 @@ from Assignment4.src.solvers.config import AllSolverConfig
 class Paths:
     root: str
     data: str
-    wine: str
-    diabetic: str
     results_data: str
     plots: str
 

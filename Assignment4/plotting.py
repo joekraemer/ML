@@ -41,7 +41,9 @@ MAP_DIR = {
         0: '⬅'
     }
 
-FROZEN_LAKE_DESC = [
+MAPS = {
+    "4": ["SFFF", "FHFH", "FFFH", "HFFG"],
+    "8": [
         "SFFFFFFF",
         "FFFFFFFF",
         "FFFHFFFF",
@@ -50,7 +52,38 @@ FROZEN_LAKE_DESC = [
         "FHHFFFHF",
         "FHFFHFHF",
         "FFFHFFFG",
-    ]
+    ],
+    "12":
+        ['SFHFFFFFFFHH',
+         'FFFFFFFFFFFF',
+         'FFFFFHFFFFHH',
+         'FFHFFFFFFFFF',
+         'FFFFFFFFFFHF',
+         'HFHHHFHFFFFF',
+         'FFFFFFFHFFHF',
+         'FFHFFFFFHFFF',
+         'FFHFFHFFFFFF',
+         'FFHFFFHHFFFF',
+         'HFFFFHHHFFFF',
+         'HFFFFHFFFFHG'],
+    "16":
+        ['SHFFFFHFFHFFFFHF',
+         'FFFFHFFFFFFFHFFF',
+         'FFFFFFFFFFFFFHFF',
+         'FHFFHFFHFFHHHFFH',
+         'FFHFFFFHFHFFHHHF',
+         'FHHFFFFFHFHHFHFF',
+         'FFFFFFHFFFFFFFHF',
+         'FFHFHHFFFFFFFFFF',
+         'FFHFFFFFFFFFHFFF',
+         'FFFFFFFFFFFFHHFF',
+         'HFFHHHFFFHFFFFFF',
+         'FHFHFFFFFFFFFFFF',
+         'FHHFHFFFFFHHFFFF',
+         'FFFFFFFFFFFFHFFF',
+         'FFFFFHFFFFHFFFFH',
+         'FFFFFHFFFFFFFHFG'],
+}
 
 # File name regex to pull dataset name
 scree_file_name_regex = re.compile('(.*)_scree\.csv')
@@ -207,10 +240,14 @@ def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> p
     # decide the rolling window size based on the total length of the dataframe
     window = max(1, int(df.shape[0] / 10))
 
-    mean = df['Error'].rolling(window=window).mean()
-    std = df['Error'].rolling(window=window, min_periods=1).std()
+    if df.shape[0] > 1000:
+        data = df['Error'].rolling(window=window, min_periods=1).mean()
+        std = df['Error'].rolling(window=window, min_periods=1).std()
+    else:
+        data = df['Error']
+        std = df['Error']
 
-    plt.plot( df['Iteration'], df['Error'], color='r')
+    plt.plot(df['Iteration'], data, color='r')
 
     temp_df = df.reindex().sort_index(ascending=False)
     last_policy = df.tail(1)['Policy'].values[0]
@@ -231,7 +268,10 @@ def plot_error_iteration(df: DataFrame, xlabel='Iteration', ylabel='Error') -> p
 
 def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
     size = int(math.sqrt(len(df)))
-    if size != len(FROZEN_LAKE_DESC):
+    try:
+        desc = MAPS[str(size)]
+    except:
+        logger.info("Size of policy doesn't match known map")
         return
 
     policy = np.reshape(df.to_numpy(), (size, size))
@@ -249,7 +289,7 @@ def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
             y = size - i - 1
             x = j
             p = plt.Rectangle([x, y], 1, 1)
-            p.set_facecolor(MAP_COLORS[FROZEN_LAKE_DESC[i][j]])
+            p.set_facecolor(MAP_COLORS[desc[i][j]])
             ax.add_patch(p)
 
             ax.text(x + 0.5, y + 0.5, MAP_DIR[policy[i, j]], weight='bold', size=font_size,
@@ -263,15 +303,19 @@ def plot_final_policy_frozen_lake(df: DataFrame) -> pyplot:
 
 
 def plot_explore_exploit(df: DataFrame, xlabel='Episode', ylabel='Avg Reward') -> pyplot:
+    colors = ['r', 'g', 'b', 'c', 'm', 'k']
     plot_basic(title='', xlabel=xlabel, ylabel=ylabel)
     # decide the rolling window size based on the total length of the dataframe
     window = max(1, int(df.shape[0] / 20))
 
     for col in df.columns:
-        mean = col.rolling(window=window, min_periods=1).mean()
-        std = col.rolling(window=window, min_periods=1).std()
-        # plt.plot(df['Iteration'], mean, color='g')
-        plt.fill_between(col.index, mean - std, mean + std, alpha=0.1, color="g",)
+        mean = df[col].rolling(window=window, min_periods=1).mean()
+        std = df[col].rolling(window=window, min_periods=1).std()
+        color = colors.pop()
+        plt.plot(df[col].index, mean, color=color, label="eps={}".format(col))
+        plt.fill_between(df[col].index, mean - std, mean + std, alpha=0.1, color=color)
+
+    plt.legend()
     return plt
 
 
@@ -381,7 +425,7 @@ def read_and_plot_explore_exploit(problem: str, file: str, output_dir: str) -> N
     solver_name = get_solver_name_from_string(file)
     logger.info("Plotting run explore exploit experiment for file {} to {} ({})".format(file, output_dir, solver_name))
 
-    df = pd.read_csv(file)
+    df = pd.read_csv(file, index_col=0)
 
     p = plot_explore_exploit(df=df)
     p = watermark(p)

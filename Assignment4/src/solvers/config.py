@@ -5,6 +5,7 @@ from typing import List
 @dataclass
 class PIConfig:
     gamma: float
+    convergence_value: float
 
 
 @dataclass
@@ -21,6 +22,7 @@ class QLearningConfig:
     epsilon_decay: float
     epsilon_min: float
     convergence_value: float
+    max_iterations: int
     epsilon_decay_values: List[int] = field(default_factory=list)
 
 

@@ -33,7 +33,7 @@ class ForestEnvironment(BaseEnvironment):
         super().__init__(cfg)
         self.Name = 'forest'
 
-    def build(self, size: int = 400, p: float = 0.005) -> Tuple: # large:  size: int = 400, p: float = 0.005
+    def build(self, size: int = 10, p: float = 0.1) -> Tuple: # large:  size: int = 400, p: float = 0.005
         P, R = example.forest(S=size, p=p, is_sparse=True)
         return FakeEnv(P, R)  # P is the transition matrix and R is the reward matrix
 
@@ -43,9 +43,9 @@ class FrozenLakeEnvironment(BaseEnvironment):
         super().__init__(cfg)
         self.Name = 'frozen_lake'
 
-    def build(self, size: int = 5, p: float = 0.8) -> Tuple:
+    def build(self, size: int = 16, p: float = 0.8) -> Tuple:
         #random_map = generate_random_map(size=size, p=p)
-        env = FrozenLakeEnvShapedMDPCompatible("FrozenLake-v1", map_name='8x8', is_slippery=True)
+        env = FrozenLakeEnvShapedMDPCompatible("FrozenLake-v1", map_name='16x16', is_slippery=True)
         return env
 
     def base_build(self, size: int = 10, p: float = 0.8) -> Tuple:

@@ -64,7 +64,7 @@ def main(cfg: A4Config) -> None:
         exp = BaseExperiment(environment=env, solver=PISolver, solver_name='PI', cfg=cfg)
         tasks.append(run_experiment(exp))
 
-        #exp = BaseExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
+        exp = BaseExperiment(environment=env, solver=QLearningSolver, solver_name='QLearning', cfg=cfg)
         tasks.append(run_experiment(exp))
 
 
