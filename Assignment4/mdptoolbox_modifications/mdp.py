@@ -614,7 +614,7 @@ class PolicyIteration(MDP):
     """
 
     def __init__(self, transitions, reward, gamma, policy0=None,
-                 max_iter=1000, eval_type=0, skip_check=False,
+                 max_iter=1000, eval_type=0, convergence_value = None, skip_check=False,
                  run_stat_frequency=None):
         # Initialise a policy iteration MDP.
         #
@@ -650,6 +650,7 @@ class PolicyIteration(MDP):
         self.v_mean = []
         self.p_cumulative = []
         self.run_stat_frequency = max(1, max_iter // 10000) if run_stat_frequency is None else run_stat_frequency
+        self.convergence_value = convergence_value
 
         # Do some setup depending on the evaluation type
         if eval_type in (0, "matrix"):
@@ -879,6 +880,13 @@ class PolicyIteration(MDP):
                 if self.verbose:
                     print(_MSG_STOP_UNCHANGING_POLICY)
                 break
+            # Convergence Check
+            # occasionally, we will not have a change in policy, but we should continue to explore so we use a rolling error check
+            elif self.convergence_value is not None:
+                if len(self.error_mean) > 1:
+                    if self.error_mean[-1] < self.convergence_value :
+                        print('breaking')
+                        break
             elif self.iter == self.max_iter:
                 if self.verbose:
                     print(_MSG_STOP_MAX_ITER)
@@ -1084,7 +1092,7 @@ class QLearning(MDP):
     def __init__(self, transitions, reward, gamma,
                  alpha=0.1, alpha_decay=0.99, alpha_min=0.001,
                  epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.99,
-                 n_iter=10000, skip_check=False, iter_callback=None,
+                 n_iter=10000, convergence_value=0.01, skip_check=False, iter_callback=None,
                  run_stat_frequency=None):
         # Initialise a Q-learning MDP.
 
@@ -1113,6 +1121,7 @@ class QLearning(MDP):
         self.epsilon_start = self.epsilon
         self.epsilon_decay = _np.clip(epsilon_decay, 0., 1.)
         self.epsilon_min = _np.clip(epsilon_min, 0., 1.)
+        self.convergence_value = _np.clip(convergence_value, 0., 1.)
 
         # Initialisations
         self.Q = _np.zeros((self.S, self.A))
@@ -1231,6 +1240,13 @@ class QLearning(MDP):
             self.epsilon *= self.epsilon_decay
             if self.epsilon < self.epsilon_min:
                 self.epsilon = self.epsilon_min
+
+            # Convergence Check
+            # occasionally, we will not have a change in policy, but we should continue to explore so we use a rolling error check
+            if len(self.error_mean) > 1:
+                if self.error_mean[-1] < self.convergence_value :
+                    print('breaking')
+                    break
 
         self._endRun()
         # add stragglers
